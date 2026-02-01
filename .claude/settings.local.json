@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(pnpm add:*)",
+      "Bash(node:*)",
+      "Bash(cmd /c del \"C:\\\\Users\\\\shawn\\\\code\\\\mgrs\\\\mgrs\\\\public\\\\100km-squares.json\")",
+      "Bash(powershell -Command:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(pnpm build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
