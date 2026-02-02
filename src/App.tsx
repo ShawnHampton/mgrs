@@ -48,7 +48,11 @@ function App() {
 
   const onHover = useCallback((info: { coordinate?: [number, number] }) => {
     if (info.coordinate) {
-      setCursorPosition({ lon: info.coordinate[0], lat: info.coordinate[1] });
+      // Normalize longitude to -180 to 180 range
+      let lon = info.coordinate[0];
+      while (lon > 180) lon -= 360;
+      while (lon < -180) lon += 360;
+      setCursorPosition({ lon, lat: info.coordinate[1] });
     }
   }, []);
 
