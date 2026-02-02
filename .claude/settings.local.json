@@ -9,7 +9,13 @@
       "Bash(npx tsc --noEmit)",
       "Bash(pnpm build:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh auth:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI:/c/Program Files \\(x86\\)/GitHub CLI\")",
+      "Bash(gh:*)",
+      "Bash(npx tsc:*)"
     ]
-  }
+  },
+  "plansDirectory": "ai/plans"
 }

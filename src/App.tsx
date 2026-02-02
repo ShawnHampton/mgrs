@@ -3,14 +3,16 @@ import DeckGL from '@deck.gl/react';
 import { MapView } from '@deck.gl/core';
 import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
+import { forward as mgrsForward } from 'mgrs';
 import { MGRSLayer } from './layers/MGRSLayer';
 import './App.css';
 
-// Initial viewport - centered on continental US
+// Initial viewport - centered on Hilo, Hawaii
 const INITIAL_VIEW_STATE = {
-  longitude: -98.5,
-  latitude: 39.8,
-  zoom: 4,
+  longitude: -155.0868,
+  latitude: 19.7241,
+  zoom: 4
+  ,
   pitch: 0,
   bearing: 0
 };
@@ -84,12 +86,31 @@ function App() {
           <span>{viewState.zoom.toFixed(1)}</span>
         </div>
         {cursorPosition && (
-          <div className="info-row">
-            <span>Position:</span>
-            <span>
-              {cursorPosition.lat.toFixed(4)}°, {cursorPosition.lon.toFixed(4)}°
-            </span>
-          </div>
+          <>
+            <div className="info-row">
+              <span>Position:</span>
+              <span>
+                {cursorPosition.lat.toFixed(4)}°, {cursorPosition.lon.toFixed(4)}°
+              </span>
+            </div>
+            <div className="info-row">
+              <span>MGRS:</span>
+              <span>
+                {(() => {
+                  const mgrs = mgrsForward([cursorPosition.lon, cursorPosition.lat], 5);
+                  // Format: ZZ ZZ AA EEEE NNNN
+                  const match = mgrs.match(/^(\d{1,2})([A-Z])([A-Z]{2})(\d+)$/);
+                  if (match) {
+                    const [, zone, band, square, coords] = match;
+                    const easting = coords.slice(0, coords.length / 2);
+                    const northing = coords.slice(coords.length / 2);
+                    return `${zone}${band} ${square} ${easting} ${northing}`;
+                  }
+                  return mgrs;
+                })()}
+              </span>
+            </div>
+          </>
         )}
         <div className="legend">
           <div className="legend-item toggle-row">

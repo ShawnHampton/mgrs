@@ -4,7 +4,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1C",
+        "gzd": "01C",
         "zone": 1,
         "band": "C"
       },
@@ -39,7 +39,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1D",
+        "gzd": "01D",
         "zone": 1,
         "band": "D"
       },
@@ -74,7 +74,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1E",
+        "gzd": "01E",
         "zone": 1,
         "band": "E"
       },
@@ -109,7 +109,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1F",
+        "gzd": "01F",
         "zone": 1,
         "band": "F"
       },
@@ -144,7 +144,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1G",
+        "gzd": "01G",
         "zone": 1,
         "band": "G"
       },
@@ -179,7 +179,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1H",
+        "gzd": "01H",
         "zone": 1,
         "band": "H"
       },
@@ -214,7 +214,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1J",
+        "gzd": "01J",
         "zone": 1,
         "band": "J"
       },
@@ -249,7 +249,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1K",
+        "gzd": "01K",
         "zone": 1,
         "band": "K"
       },
@@ -284,7 +284,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1L",
+        "gzd": "01L",
         "zone": 1,
         "band": "L"
       },
@@ -319,7 +319,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1M",
+        "gzd": "01M",
         "zone": 1,
         "band": "M"
       },
@@ -354,7 +354,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1N",
+        "gzd": "01N",
         "zone": 1,
         "band": "N"
       },
@@ -389,7 +389,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1P",
+        "gzd": "01P",
         "zone": 1,
         "band": "P"
       },
@@ -424,7 +424,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1Q",
+        "gzd": "01Q",
         "zone": 1,
         "band": "Q"
       },
@@ -459,7 +459,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1R",
+        "gzd": "01R",
         "zone": 1,
         "band": "R"
       },
@@ -494,7 +494,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1S",
+        "gzd": "01S",
         "zone": 1,
         "band": "S"
       },
@@ -529,7 +529,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1T",
+        "gzd": "01T",
         "zone": 1,
         "band": "T"
       },
@@ -564,7 +564,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1U",
+        "gzd": "01U",
         "zone": 1,
         "band": "U"
       },
@@ -599,7 +599,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1V",
+        "gzd": "01V",
         "zone": 1,
         "band": "V"
       },
@@ -634,7 +634,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1W",
+        "gzd": "01W",
         "zone": 1,
         "band": "W"
       },
@@ -669,7 +669,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "1X",
+        "gzd": "01X",
         "zone": 1,
         "band": "X"
       },
@@ -704,7 +704,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2C",
+        "gzd": "02C",
         "zone": 2,
         "band": "C"
       },
@@ -739,7 +739,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2D",
+        "gzd": "02D",
         "zone": 2,
         "band": "D"
       },
@@ -774,7 +774,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2E",
+        "gzd": "02E",
         "zone": 2,
         "band": "E"
       },
@@ -809,7 +809,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2F",
+        "gzd": "02F",
         "zone": 2,
         "band": "F"
       },
@@ -844,7 +844,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2G",
+        "gzd": "02G",
         "zone": 2,
         "band": "G"
       },
@@ -879,7 +879,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2H",
+        "gzd": "02H",
         "zone": 2,
         "band": "H"
       },
@@ -914,7 +914,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2J",
+        "gzd": "02J",
         "zone": 2,
         "band": "J"
       },
@@ -949,7 +949,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2K",
+        "gzd": "02K",
         "zone": 2,
         "band": "K"
       },
@@ -984,7 +984,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2L",
+        "gzd": "02L",
         "zone": 2,
         "band": "L"
       },
@@ -1019,7 +1019,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2M",
+        "gzd": "02M",
         "zone": 2,
         "band": "M"
       },
@@ -1054,7 +1054,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2N",
+        "gzd": "02N",
         "zone": 2,
         "band": "N"
       },
@@ -1089,7 +1089,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2P",
+        "gzd": "02P",
         "zone": 2,
         "band": "P"
       },
@@ -1124,7 +1124,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2Q",
+        "gzd": "02Q",
         "zone": 2,
         "band": "Q"
       },
@@ -1159,7 +1159,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2R",
+        "gzd": "02R",
         "zone": 2,
         "band": "R"
       },
@@ -1194,7 +1194,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2S",
+        "gzd": "02S",
         "zone": 2,
         "band": "S"
       },
@@ -1229,7 +1229,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2T",
+        "gzd": "02T",
         "zone": 2,
         "band": "T"
       },
@@ -1264,7 +1264,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2U",
+        "gzd": "02U",
         "zone": 2,
         "band": "U"
       },
@@ -1299,7 +1299,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2V",
+        "gzd": "02V",
         "zone": 2,
         "band": "V"
       },
@@ -1334,7 +1334,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2W",
+        "gzd": "02W",
         "zone": 2,
         "band": "W"
       },
@@ -1369,7 +1369,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "2X",
+        "gzd": "02X",
         "zone": 2,
         "band": "X"
       },
@@ -1404,7 +1404,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3C",
+        "gzd": "03C",
         "zone": 3,
         "band": "C"
       },
@@ -1439,7 +1439,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3D",
+        "gzd": "03D",
         "zone": 3,
         "band": "D"
       },
@@ -1474,7 +1474,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3E",
+        "gzd": "03E",
         "zone": 3,
         "band": "E"
       },
@@ -1509,7 +1509,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3F",
+        "gzd": "03F",
         "zone": 3,
         "band": "F"
       },
@@ -1544,7 +1544,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3G",
+        "gzd": "03G",
         "zone": 3,
         "band": "G"
       },
@@ -1579,7 +1579,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3H",
+        "gzd": "03H",
         "zone": 3,
         "band": "H"
       },
@@ -1614,7 +1614,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3J",
+        "gzd": "03J",
         "zone": 3,
         "band": "J"
       },
@@ -1649,7 +1649,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3K",
+        "gzd": "03K",
         "zone": 3,
         "band": "K"
       },
@@ -1684,7 +1684,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3L",
+        "gzd": "03L",
         "zone": 3,
         "band": "L"
       },
@@ -1719,7 +1719,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3M",
+        "gzd": "03M",
         "zone": 3,
         "band": "M"
       },
@@ -1754,7 +1754,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3N",
+        "gzd": "03N",
         "zone": 3,
         "band": "N"
       },
@@ -1789,7 +1789,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3P",
+        "gzd": "03P",
         "zone": 3,
         "band": "P"
       },
@@ -1824,7 +1824,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3Q",
+        "gzd": "03Q",
         "zone": 3,
         "band": "Q"
       },
@@ -1859,7 +1859,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3R",
+        "gzd": "03R",
         "zone": 3,
         "band": "R"
       },
@@ -1894,7 +1894,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3S",
+        "gzd": "03S",
         "zone": 3,
         "band": "S"
       },
@@ -1929,7 +1929,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3T",
+        "gzd": "03T",
         "zone": 3,
         "band": "T"
       },
@@ -1964,7 +1964,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3U",
+        "gzd": "03U",
         "zone": 3,
         "band": "U"
       },
@@ -1999,7 +1999,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3V",
+        "gzd": "03V",
         "zone": 3,
         "band": "V"
       },
@@ -2034,7 +2034,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3W",
+        "gzd": "03W",
         "zone": 3,
         "band": "W"
       },
@@ -2069,7 +2069,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "3X",
+        "gzd": "03X",
         "zone": 3,
         "band": "X"
       },
@@ -2104,7 +2104,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4C",
+        "gzd": "04C",
         "zone": 4,
         "band": "C"
       },
@@ -2139,7 +2139,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4D",
+        "gzd": "04D",
         "zone": 4,
         "band": "D"
       },
@@ -2174,7 +2174,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4E",
+        "gzd": "04E",
         "zone": 4,
         "band": "E"
       },
@@ -2209,7 +2209,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4F",
+        "gzd": "04F",
         "zone": 4,
         "band": "F"
       },
@@ -2244,7 +2244,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4G",
+        "gzd": "04G",
         "zone": 4,
         "band": "G"
       },
@@ -2279,7 +2279,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4H",
+        "gzd": "04H",
         "zone": 4,
         "band": "H"
       },
@@ -2314,7 +2314,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4J",
+        "gzd": "04J",
         "zone": 4,
         "band": "J"
       },
@@ -2349,7 +2349,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4K",
+        "gzd": "04K",
         "zone": 4,
         "band": "K"
       },
@@ -2384,7 +2384,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4L",
+        "gzd": "04L",
         "zone": 4,
         "band": "L"
       },
@@ -2419,7 +2419,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4M",
+        "gzd": "04M",
         "zone": 4,
         "band": "M"
       },
@@ -2454,7 +2454,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4N",
+        "gzd": "04N",
         "zone": 4,
         "band": "N"
       },
@@ -2489,7 +2489,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4P",
+        "gzd": "04P",
         "zone": 4,
         "band": "P"
       },
@@ -2524,7 +2524,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4Q",
+        "gzd": "04Q",
         "zone": 4,
         "band": "Q"
       },
@@ -2559,7 +2559,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4R",
+        "gzd": "04R",
         "zone": 4,
         "band": "R"
       },
@@ -2594,7 +2594,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4S",
+        "gzd": "04S",
         "zone": 4,
         "band": "S"
       },
@@ -2629,7 +2629,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4T",
+        "gzd": "04T",
         "zone": 4,
         "band": "T"
       },
@@ -2664,7 +2664,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4U",
+        "gzd": "04U",
         "zone": 4,
         "band": "U"
       },
@@ -2699,7 +2699,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4V",
+        "gzd": "04V",
         "zone": 4,
         "band": "V"
       },
@@ -2734,7 +2734,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4W",
+        "gzd": "04W",
         "zone": 4,
         "band": "W"
       },
@@ -2769,7 +2769,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "4X",
+        "gzd": "04X",
         "zone": 4,
         "band": "X"
       },
@@ -2804,7 +2804,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5C",
+        "gzd": "05C",
         "zone": 5,
         "band": "C"
       },
@@ -2839,7 +2839,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5D",
+        "gzd": "05D",
         "zone": 5,
         "band": "D"
       },
@@ -2874,7 +2874,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5E",
+        "gzd": "05E",
         "zone": 5,
         "band": "E"
       },
@@ -2909,7 +2909,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5F",
+        "gzd": "05F",
         "zone": 5,
         "band": "F"
       },
@@ -2944,7 +2944,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5G",
+        "gzd": "05G",
         "zone": 5,
         "band": "G"
       },
@@ -2979,7 +2979,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5H",
+        "gzd": "05H",
         "zone": 5,
         "band": "H"
       },
@@ -3014,7 +3014,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5J",
+        "gzd": "05J",
         "zone": 5,
         "band": "J"
       },
@@ -3049,7 +3049,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5K",
+        "gzd": "05K",
         "zone": 5,
         "band": "K"
       },
@@ -3084,7 +3084,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5L",
+        "gzd": "05L",
         "zone": 5,
         "band": "L"
       },
@@ -3119,7 +3119,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5M",
+        "gzd": "05M",
         "zone": 5,
         "band": "M"
       },
@@ -3154,7 +3154,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5N",
+        "gzd": "05N",
         "zone": 5,
         "band": "N"
       },
@@ -3189,7 +3189,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5P",
+        "gzd": "05P",
         "zone": 5,
         "band": "P"
       },
@@ -3224,7 +3224,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5Q",
+        "gzd": "05Q",
         "zone": 5,
         "band": "Q"
       },
@@ -3259,7 +3259,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5R",
+        "gzd": "05R",
         "zone": 5,
         "band": "R"
       },
@@ -3294,7 +3294,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5S",
+        "gzd": "05S",
         "zone": 5,
         "band": "S"
       },
@@ -3329,7 +3329,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5T",
+        "gzd": "05T",
         "zone": 5,
         "band": "T"
       },
@@ -3364,7 +3364,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5U",
+        "gzd": "05U",
         "zone": 5,
         "band": "U"
       },
@@ -3399,7 +3399,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5V",
+        "gzd": "05V",
         "zone": 5,
         "band": "V"
       },
@@ -3434,7 +3434,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5W",
+        "gzd": "05W",
         "zone": 5,
         "band": "W"
       },
@@ -3469,7 +3469,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "5X",
+        "gzd": "05X",
         "zone": 5,
         "band": "X"
       },
@@ -3504,7 +3504,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6C",
+        "gzd": "06C",
         "zone": 6,
         "band": "C"
       },
@@ -3539,7 +3539,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6D",
+        "gzd": "06D",
         "zone": 6,
         "band": "D"
       },
@@ -3574,7 +3574,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6E",
+        "gzd": "06E",
         "zone": 6,
         "band": "E"
       },
@@ -3609,7 +3609,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6F",
+        "gzd": "06F",
         "zone": 6,
         "band": "F"
       },
@@ -3644,7 +3644,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6G",
+        "gzd": "06G",
         "zone": 6,
         "band": "G"
       },
@@ -3679,7 +3679,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6H",
+        "gzd": "06H",
         "zone": 6,
         "band": "H"
       },
@@ -3714,7 +3714,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6J",
+        "gzd": "06J",
         "zone": 6,
         "band": "J"
       },
@@ -3749,7 +3749,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6K",
+        "gzd": "06K",
         "zone": 6,
         "band": "K"
       },
@@ -3784,7 +3784,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6L",
+        "gzd": "06L",
         "zone": 6,
         "band": "L"
       },
@@ -3819,7 +3819,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6M",
+        "gzd": "06M",
         "zone": 6,
         "band": "M"
       },
@@ -3854,7 +3854,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6N",
+        "gzd": "06N",
         "zone": 6,
         "band": "N"
       },
@@ -3889,7 +3889,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6P",
+        "gzd": "06P",
         "zone": 6,
         "band": "P"
       },
@@ -3924,7 +3924,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6Q",
+        "gzd": "06Q",
         "zone": 6,
         "band": "Q"
       },
@@ -3959,7 +3959,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6R",
+        "gzd": "06R",
         "zone": 6,
         "band": "R"
       },
@@ -3994,7 +3994,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6S",
+        "gzd": "06S",
         "zone": 6,
         "band": "S"
       },
@@ -4029,7 +4029,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6T",
+        "gzd": "06T",
         "zone": 6,
         "band": "T"
       },
@@ -4064,7 +4064,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6U",
+        "gzd": "06U",
         "zone": 6,
         "band": "U"
       },
@@ -4099,7 +4099,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6V",
+        "gzd": "06V",
         "zone": 6,
         "band": "V"
       },
@@ -4134,7 +4134,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6W",
+        "gzd": "06W",
         "zone": 6,
         "band": "W"
       },
@@ -4169,7 +4169,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "6X",
+        "gzd": "06X",
         "zone": 6,
         "band": "X"
       },
@@ -4204,7 +4204,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7C",
+        "gzd": "07C",
         "zone": 7,
         "band": "C"
       },
@@ -4239,7 +4239,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7D",
+        "gzd": "07D",
         "zone": 7,
         "band": "D"
       },
@@ -4274,7 +4274,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7E",
+        "gzd": "07E",
         "zone": 7,
         "band": "E"
       },
@@ -4309,7 +4309,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7F",
+        "gzd": "07F",
         "zone": 7,
         "band": "F"
       },
@@ -4344,7 +4344,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7G",
+        "gzd": "07G",
         "zone": 7,
         "band": "G"
       },
@@ -4379,7 +4379,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7H",
+        "gzd": "07H",
         "zone": 7,
         "band": "H"
       },
@@ -4414,7 +4414,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7J",
+        "gzd": "07J",
         "zone": 7,
         "band": "J"
       },
@@ -4449,7 +4449,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7K",
+        "gzd": "07K",
         "zone": 7,
         "band": "K"
       },
@@ -4484,7 +4484,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7L",
+        "gzd": "07L",
         "zone": 7,
         "band": "L"
       },
@@ -4519,7 +4519,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7M",
+        "gzd": "07M",
         "zone": 7,
         "band": "M"
       },
@@ -4554,7 +4554,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7N",
+        "gzd": "07N",
         "zone": 7,
         "band": "N"
       },
@@ -4589,7 +4589,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7P",
+        "gzd": "07P",
         "zone": 7,
         "band": "P"
       },
@@ -4624,7 +4624,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7Q",
+        "gzd": "07Q",
         "zone": 7,
         "band": "Q"
       },
@@ -4659,7 +4659,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7R",
+        "gzd": "07R",
         "zone": 7,
         "band": "R"
       },
@@ -4694,7 +4694,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7S",
+        "gzd": "07S",
         "zone": 7,
         "band": "S"
       },
@@ -4729,7 +4729,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7T",
+        "gzd": "07T",
         "zone": 7,
         "band": "T"
       },
@@ -4764,7 +4764,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7U",
+        "gzd": "07U",
         "zone": 7,
         "band": "U"
       },
@@ -4799,7 +4799,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7V",
+        "gzd": "07V",
         "zone": 7,
         "band": "V"
       },
@@ -4834,7 +4834,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7W",
+        "gzd": "07W",
         "zone": 7,
         "band": "W"
       },
@@ -4869,7 +4869,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "7X",
+        "gzd": "07X",
         "zone": 7,
         "band": "X"
       },
@@ -4904,7 +4904,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8C",
+        "gzd": "08C",
         "zone": 8,
         "band": "C"
       },
@@ -4939,7 +4939,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8D",
+        "gzd": "08D",
         "zone": 8,
         "band": "D"
       },
@@ -4974,7 +4974,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8E",
+        "gzd": "08E",
         "zone": 8,
         "band": "E"
       },
@@ -5009,7 +5009,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8F",
+        "gzd": "08F",
         "zone": 8,
         "band": "F"
       },
@@ -5044,7 +5044,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8G",
+        "gzd": "08G",
         "zone": 8,
         "band": "G"
       },
@@ -5079,7 +5079,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8H",
+        "gzd": "08H",
         "zone": 8,
         "band": "H"
       },
@@ -5114,7 +5114,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8J",
+        "gzd": "08J",
         "zone": 8,
         "band": "J"
       },
@@ -5149,7 +5149,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8K",
+        "gzd": "08K",
         "zone": 8,
         "band": "K"
       },
@@ -5184,7 +5184,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8L",
+        "gzd": "08L",
         "zone": 8,
         "band": "L"
       },
@@ -5219,7 +5219,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8M",
+        "gzd": "08M",
         "zone": 8,
         "band": "M"
       },
@@ -5254,7 +5254,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8N",
+        "gzd": "08N",
         "zone": 8,
         "band": "N"
       },
@@ -5289,7 +5289,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8P",
+        "gzd": "08P",
         "zone": 8,
         "band": "P"
       },
@@ -5324,7 +5324,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8Q",
+        "gzd": "08Q",
         "zone": 8,
         "band": "Q"
       },
@@ -5359,7 +5359,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8R",
+        "gzd": "08R",
         "zone": 8,
         "band": "R"
       },
@@ -5394,7 +5394,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8S",
+        "gzd": "08S",
         "zone": 8,
         "band": "S"
       },
@@ -5429,7 +5429,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8T",
+        "gzd": "08T",
         "zone": 8,
         "band": "T"
       },
@@ -5464,7 +5464,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8U",
+        "gzd": "08U",
         "zone": 8,
         "band": "U"
       },
@@ -5499,7 +5499,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8V",
+        "gzd": "08V",
         "zone": 8,
         "band": "V"
       },
@@ -5534,7 +5534,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8W",
+        "gzd": "08W",
         "zone": 8,
         "band": "W"
       },
@@ -5569,7 +5569,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "8X",
+        "gzd": "08X",
         "zone": 8,
         "band": "X"
       },
@@ -5604,7 +5604,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9C",
+        "gzd": "09C",
         "zone": 9,
         "band": "C"
       },
@@ -5639,7 +5639,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9D",
+        "gzd": "09D",
         "zone": 9,
         "band": "D"
       },
@@ -5674,7 +5674,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9E",
+        "gzd": "09E",
         "zone": 9,
         "band": "E"
       },
@@ -5709,7 +5709,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9F",
+        "gzd": "09F",
         "zone": 9,
         "band": "F"
       },
@@ -5744,7 +5744,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9G",
+        "gzd": "09G",
         "zone": 9,
         "band": "G"
       },
@@ -5779,7 +5779,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9H",
+        "gzd": "09H",
         "zone": 9,
         "band": "H"
       },
@@ -5814,7 +5814,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9J",
+        "gzd": "09J",
         "zone": 9,
         "band": "J"
       },
@@ -5849,7 +5849,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9K",
+        "gzd": "09K",
         "zone": 9,
         "band": "K"
       },
@@ -5884,7 +5884,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9L",
+        "gzd": "09L",
         "zone": 9,
         "band": "L"
       },
@@ -5919,7 +5919,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9M",
+        "gzd": "09M",
         "zone": 9,
         "band": "M"
       },
@@ -5954,7 +5954,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9N",
+        "gzd": "09N",
         "zone": 9,
         "band": "N"
       },
@@ -5989,7 +5989,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9P",
+        "gzd": "09P",
         "zone": 9,
         "band": "P"
       },
@@ -6024,7 +6024,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9Q",
+        "gzd": "09Q",
         "zone": 9,
         "band": "Q"
       },
@@ -6059,7 +6059,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9R",
+        "gzd": "09R",
         "zone": 9,
         "band": "R"
       },
@@ -6094,7 +6094,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9S",
+        "gzd": "09S",
         "zone": 9,
         "band": "S"
       },
@@ -6129,7 +6129,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9T",
+        "gzd": "09T",
         "zone": 9,
         "band": "T"
       },
@@ -6164,7 +6164,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9U",
+        "gzd": "09U",
         "zone": 9,
         "band": "U"
       },
@@ -6199,7 +6199,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9V",
+        "gzd": "09V",
         "zone": 9,
         "band": "V"
       },
@@ -6234,7 +6234,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9W",
+        "gzd": "09W",
         "zone": 9,
         "band": "W"
       },
@@ -6269,7 +6269,7 @@
     {
       "type": "Feature",
       "properties": {
-        "gzd": "9X",
+        "gzd": "09X",
         "zone": 9,
         "band": "X"
       },

@@ -9,7 +9,7 @@ export interface GZDFeature {
   type: 'Feature';
   properties: {
     gzd: string;
-    zone: number;
+    zone: string;
     band: string;
   };
   geometry: {

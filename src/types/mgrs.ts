@@ -28,6 +28,7 @@ export interface TileRequest {
   y: number;
   z: number;
   zoom: number;
+  requestId?: number;
 }
 
 export interface GridLine {
@@ -45,6 +46,7 @@ export interface GridLabel {
 export interface TileResponse {
   lines: GridLine[];
   labels: GridLabel[];
+  requestId?: number;
   // Optional: binary data for performance
   linePositions?: Float32Array;
   lineColors?: Uint8Array;
@@ -67,7 +69,7 @@ export interface MGRSSquareFeature {
 // Worker request to generate 100km squares for a GZD
 export interface Generate100kmRequest {
   gzd: string;
-  zone: number;
+  zone: string;
   band: string;
   hemisphere: 'N' | 'S';
   bounds: number[][][]; // GZD polygon coordinates
@@ -79,13 +81,29 @@ export interface Generate100kmResponse {
   features: MGRSSquareFeature[];
 }
 
+// Worker request to generate 10km grid cells for a 100km square
+export interface Generate10kmRequest {
+  squareId: string;       // e.g. "18SUJ"
+  zone: string;
+  hemisphere: 'N' | 'S';
+  bounds: number[][][];   // 100km square polygon coordinates
+}
+
+// Worker response with generated 10km grid cell features
+export interface Generate10kmResponse {
+  squareId: string;
+  features: MGRSSquareFeature[];
+}
+
 // Worker message wrapper
 export type WorkerMessage =
-  | { type: 'request'; payload: TileRequest }
-  | { type: 'response'; payload: TileResponse }
+  | { type: 'request'; payload: TileRequest; requestId?: number }
+  | { type: 'response'; payload: TileResponse; requestId?: number }
   | { type: 'generate-100km'; payload: Generate100kmRequest }
   | { type: 'generate-100km-result'; payload: Generate100kmResponse }
-  | { type: 'error'; payload: string };
+  | { type: 'generate-10km'; payload: Generate10kmRequest }
+  | { type: 'generate-10km-result'; payload: Generate10kmResponse }
+  | { type: 'error'; payload: string; requestId?: number };
 
 // Layer props
 export interface MGRSLayerProps {

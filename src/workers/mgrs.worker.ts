@@ -6,8 +6,9 @@
  */
 
 import proj4 from 'proj4';
-import type { TileRequest, TileResponse, GridLine, GridLabel, LatLonBounds, UTMZone, Generate100kmRequest, Generate100kmResponse } from '../types/mgrs';
+import type { TileRequest, TileResponse, GridLine, GridLabel, LatLonBounds, UTMZone, Generate100kmRequest, Generate100kmResponse, Generate10kmRequest, Generate10kmResponse } from '../types/mgrs';
 import { generate100kmSquaresForGZD, getGZDHemisphere } from '../utils/generate100kmSquares';
+import { generate10kmGridForSquare } from '../utils/generate10kmGrid';
 
 // Re-implement projection functions here since workers have separate scope
 const UTM_PROJ_CACHE: Map<number, string> = new Map();
@@ -79,11 +80,11 @@ function getUTMZonesForBounds(bounds: LatLonBounds): UTMZone[] {
   return zones;
 }
 
-function getResolutionForZoom(zoom: number): number {
-  if (zoom < 10) return 0;     // GZD + 100km handled by dedicated layer
-  if (zoom < 13) return 10000;  // 10km
-  if (zoom < 16) return 1000;   // 1km
-  return 100;                   // 100m
+function getResolutionsForZoom(zoom: number): number[] {
+  if (zoom < 8) return [];               // GZD + 100km handled by dedicated layer
+  if (zoom < 13) return [10000];         // 10km
+  if (zoom < 16) return [10000, 1000];   // 10km + 1km
+  return [10000, 1000, 100];             // 10km + 1km + 100m
 }
 
 function getLevelForResolution(resolution: number): GridLine['level'] {
@@ -169,9 +170,9 @@ function generateGridLinesForTile(
       for (let i = 0; i <= numSegments; i++) {
         const n = minN + i * nStep;
         const [lon, lat] = utmToLatLon(e, n, zone, hemisphere);
-        
-        // Clip to zone bounds
-        if (lon >= zoneBounds.west && lon <= zoneBounds.east) {
+
+        // Clip to zone bounds (epsilon buffer for floating-point boundary precision)
+        if (lon >= zoneBounds.west - 0.0001 && lon <= zoneBounds.east + 0.0001) {
           points.push([lon, lat]);
         }
       }
@@ -196,11 +197,11 @@ function generateGridLinesForTile(
         const e = minE + i * eStep;
         const [lon, lat] = utmToLatLon(e, n, zone, hemisphere);
         
-        if (lon >= zoneBounds.west && lon <= zoneBounds.east) {
+        if (lon >= zoneBounds.west - 0.0001 && lon <= zoneBounds.east + 0.0001) {
           points.push([lon, lat]);
         }
       }
-      
+
       for (let i = 0; i < points.length - 1; i++) {
         lines.push({
           start: points[i],
@@ -209,7 +210,7 @@ function generateGridLinesForTile(
         });
       }
     }
-    
+
     // Generate labels at grid intersections (bottom-left per NATO standard)
     for (let e = minE; e <= maxE; e += resolution) {
       for (let n = minN; n <= maxN; n += resolution) {
@@ -224,7 +225,7 @@ function generateGridLinesForTile(
             // 100km: Show zone + band + square ID
             const band = getLatitudeBand(lat);
             const squareId = get100kmSquareId(e, n, zone);
-            text = `${zone}${band}${squareId}`;
+            text = `${zone.toString().padStart(2, '0')}${band}${squareId}`;
           } else {
             // Smaller grids: Show truncated coordinates
             const eDigits = Math.floor(e / resolution) % 10;
@@ -252,29 +253,32 @@ function generateGridLinesForTile(
  * Process a tile request and generate grid data
  */
 function processTileRequest(request: TileRequest): TileResponse {
-  const { x, y, z, zoom } = request;
-  const resolution = getResolutionForZoom(zoom);
-  
+  const { x, y, z, zoom, requestId } = request;
+  const resolutions = getResolutionsForZoom(zoom);
+
   // At low zoom, use static GZD layer
-  if (resolution === 0) {
-    return { lines: [], labels: [] };
+  if (resolutions.length === 0) {
+    return { lines: [], labels: [], requestId };
   }
-  
+
   const bounds = tileToLatLonBounds(x, y, z);
   const zones = getUTMZonesForBounds(bounds);
-  
+
   const allLines: GridLine[] = [];
   const allLabels: GridLabel[] = [];
-  
-  for (const { zone, hemisphere } of zones) {
-    const { lines, labels } = generateGridLinesForTile(bounds, zone, hemisphere, resolution);
-    allLines.push(...lines);
-    allLabels.push(...labels);
+
+  for (const resolution of resolutions) {
+    for (const { zone, hemisphere } of zones) {
+      const { lines, labels } = generateGridLinesForTile(bounds, zone, hemisphere, resolution);
+      allLines.push(...lines);
+      allLabels.push(...labels);
+    }
   }
-  
+
   return {
     lines: allLines,
-    labels: allLabels
+    labels: allLabels,
+    requestId
   };
 }
 
@@ -295,11 +299,12 @@ self.onmessage = (event: MessageEvent) => {
   if (type === 'request') {
     try {
       const response = processTileRequest(payload as TileRequest);
-      self.postMessage({ type: 'response', payload: response });
+      self.postMessage({ type: 'response', payload: response, requestId: response.requestId });
     } catch (error) {
       self.postMessage({
         type: 'error',
-        payload: error instanceof Error ? error.message : 'Unknown error'
+        payload: error instanceof Error ? error.message : 'Unknown error',
+        requestId: (payload as TileRequest)?.requestId
       });
     }
   } else if (type === 'generate-100km') {
@@ -310,6 +315,31 @@ self.onmessage = (event: MessageEvent) => {
       self.postMessage({
         type: 'error',
         payload: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  } else if (type === 'generate-10km') {
+    try {
+      const req = payload as Generate10kmRequest;
+      // DEBUG LOGGING for problematic squares
+      if (req.squareId.startsWith('05QK') || req.squareId.startsWith('05QKB')) {
+        console.log(`[Worker] Generating 10km grid for ${req.squareId}. Zone: ${req.zone}, Hemisphere: ${req.hemisphere}`);
+      }
+
+      const features = generate10kmGridForSquare(req.zone, req.hemisphere, req.bounds, req.squareId);
+      
+      if (req.squareId.startsWith('05QK')) {
+        console.log(`[Worker] Generated ${features.length} features for ${req.squareId}`);
+      }
+
+      const response: Generate10kmResponse = { squareId: req.squareId, features };
+      self.postMessage({ type: 'generate-10km-result', payload: response });
+    } catch (error) {
+      self.postMessage({
+        type: 'generate-10km-error',
+        payload: {
+          squareId: (payload as Generate10kmRequest).squareId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
       });
     }
   }
