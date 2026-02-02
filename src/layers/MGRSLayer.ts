@@ -9,37 +9,37 @@
 
 import { CompositeLayer } from '@deck.gl/core';
 import type { MGRSLayerProps } from '../types/mgrs';
-import type { GZDGeoJSON } from '../utils/generateGZD';
 import { GZDGridLayer } from './GZDGridLayer';
 import { Grid100kmLayer } from './Grid100kmLayer';
 import { Grid10kmLayer } from './Grid10kmLayer';
 import { DEFAULT_PROPS } from './layerConfig';
+import { useMGRSStore } from '../store/mgrsStore';
 
 export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'MGRSLayer';
   static defaultProps = DEFAULT_PROPS;
 
-  private gzdData: GZDGeoJSON | null = null;
-  private gzdLoadError: boolean = false;
-
   initializeState() {
     this.loadGZDData();
-    this.setState({ visible100kmSquares: [] });
   }
 
   private async loadGZDData() {
-    if (this.gzdData || this.gzdLoadError) return;
+    const store = useMGRSStore.getState();
+    
+    // Only load if not already loaded or loading
+    if (store.gzdData || store.gzdLoadError) return;
 
     try {
       console.log('[MGRSLayer] Loading GZD data from /gzds.json');
       const response = await fetch('/gzds.json');
       if (!response.ok) throw new Error(`Failed to load GZD data: ${response.status}`);
-      this.gzdData = await response.json();
-      console.log('[MGRSLayer] GZD data loaded:', this.gzdData!.features?.length, 'features');
+      const data = await response.json();
+      console.log('[MGRSLayer] GZD data loaded:', data.features?.length, 'features');
+      store.setGzdData(data);
       this.setNeedsUpdate();
     } catch (error) {
       console.error('[MGRSLayer] Error loading GZD data:', error);
-      this.gzdLoadError = true;
+      store.setGzdLoadError(true);
     }
   }
 
@@ -48,7 +48,9 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
   }
 
   renderLayers() {
-    if (!this.props.visible || !this.gzdData) return [];
+    const store = useMGRSStore.getState();
+    
+    if (!this.props.visible || !store.gzdData) return [];
 
     const zoom = this.context.viewport?.zoom || 0;
     const layers = [];
@@ -64,13 +66,11 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
     }
 
     // 100km layer - visible at zoom 5-12
-    // Also renders at zoom >= 8 to provide data for 10km layer
     if (zoom >= 5) {
       layers.push(
         new Grid100kmLayer({
           ...this.props,
           id: `${this.props.id}-100km-layer`,
-          gzdData: this.gzdData,
           visible: zoom < 13, // Only visible rendering below zoom 13
         })
       );
@@ -82,7 +82,6 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
         new Grid10kmLayer({
           ...this.props,
           id: `${this.props.id}-10km-layer`,
-          gzdData: this.gzdData, // Pass gzdData so it can get 100km squares
         })
       );
     }

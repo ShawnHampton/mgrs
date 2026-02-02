@@ -1,132 +1,18 @@
 /**
- * 10km Grid Layer - Renders 10km MGRS grid cells
+ * 10km Grid Layer - Renders 10km MGRS grid cells from store
  * Visible at zoom >= 8
+ * 
+ * This layer only renders what's in the store - ViewportManager handles data population
  */
 
 import { CompositeLayer, Layer } from '@deck.gl/core';
 import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
-import type { MGRSLayerProps, MGRSSquareFeature, Generate10kmRequest, Generate10kmResponse, Generate100kmRequest, Generate100kmResponse } from '../types/mgrs';
-import type { GZDGeoJSON } from '../utils/generateGZD';
-import { getWorkerPool } from '../utils/WorkerPool';
-import { bboxIntersects, getBottomLeftPosition, getViewportBounds } from '../utils/viewportUtils';
+import type { MGRSLayerProps, MGRSSquareFeature } from '../types/mgrs';
+import { getBottomLeftPosition } from '../utils/viewportUtils';
+import { useMGRSStore } from '../store/mgrsStore';
 
-interface Grid10kmLayerProps extends MGRSLayerProps {
-  gzdData: GZDGeoJSON;
-}
-
-export class Grid10kmLayer extends CompositeLayer<Grid10kmLayerProps> {
+export class Grid10kmLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'Grid10kmLayer';
-
-  private grid10kmCache: Map<string, MGRSSquareFeature[]> = new Map();
-  private pending10kmSquares: Set<string> = new Set();
-  private squares100kmCache: Map<string, MGRSSquareFeature[]> = new Map();
-  private pendingGZDs: Set<string> = new Set();
-
-  private getVisible100kmSquares(): MGRSSquareFeature[] {
-    const { gzdData } = this.props;
-    if (!gzdData) return [];
-
-    const viewport = this.context.viewport;
-    if (!viewport) return [];
-
-    const bounds = getViewportBounds(viewport);
-    if (!bounds) return [];
-
-    const { viewWest, viewSouth, viewEast, viewNorth } = bounds;
-    const allFeatures: MGRSSquareFeature[] = [];
-    const processedGZDs = new Set<string>();
-
-    for (const feature of gzdData.features) {
-      const gzdName = feature.properties.gzd;
-      
-      if (processedGZDs.has(gzdName)) continue;
-      processedGZDs.add(gzdName);
-
-      const coords = feature.geometry.coordinates;
-      if (!bboxIntersects(coords, viewWest, viewSouth, viewEast, viewNorth)) {
-        continue;
-      }
-
-      if (this.squares100kmCache.has(gzdName)) {
-        const cachedSquares = this.squares100kmCache.get(gzdName)!;
-        for (const square of cachedSquares) {
-          if (bboxIntersects(square.geometry.coordinates, viewWest, viewSouth, viewEast, viewNorth)) {
-            allFeatures.push(square);
-          }
-        }
-        continue;
-      }
-
-      if (!this.pendingGZDs.has(gzdName)) {
-        this.pendingGZDs.add(gzdName);
-
-        const request: Generate100kmRequest = {
-          gzd: gzdName,
-          zone: feature.properties.zone,
-          band: feature.properties.band,
-          hemisphere: feature.properties.band >= 'N' ? 'N' : 'S',
-          bounds: coords,
-        };
-
-        getWorkerPool().requestGenerate100km(request, (response: Generate100kmResponse) => {
-          this.squares100kmCache.set(response.gzd, response.features);
-          this.pendingGZDs.delete(response.gzd);
-          this.setNeedsUpdate();
-        });
-      }
-    }
-
-    return allFeatures;
-  }
-
-  private getVisible10kmGrids(): MGRSSquareFeature[] {
-    const visible100kmSquares = this.getVisible100kmSquares();
-    const allFeatures: MGRSSquareFeature[] = [];
-
-    for (const square of visible100kmSquares) {
-      const squareId = square.properties.id;
-
-      if (this.grid10kmCache.has(squareId)) {
-        allFeatures.push(...this.grid10kmCache.get(squareId)!);
-        continue;
-      }
-
-      if (!this.pending10kmSquares.has(squareId)) {
-        this.pending10kmSquares.add(squareId);
-
-        const match = squareId.match(/^(\d{2})([A-Z])/);
-        if (!match) {
-          console.warn(`[Grid10kmLayer] Invalid MGRS ID format: ${squareId}`);
-          continue;
-        }
-
-        const zone = parseInt(match[1], 10);
-        const band = match[2];
-        const hemisphere: 'N' | 'S' = band >= 'N' ? 'N' : 'S';
-
-        const request: Generate10kmRequest = {
-          squareId,
-          zone,
-          hemisphere,
-          bounds: square.geometry.coordinates,
-        };
-
-        getWorkerPool().requestGenerate10km(
-          request,
-          (response: Generate10kmResponse) => {
-            this.grid10kmCache.set(response.squareId, response.features);
-            this.pending10kmSquares.delete(response.squareId);
-            this.setNeedsUpdate();
-          },
-          (_error: string) => {
-            this.pending10kmSquares.delete(squareId);
-          }
-        );
-      }
-    }
-
-    return allFeatures;
-  }
 
   shouldUpdateState({ changeFlags }: any) {
     return changeFlags.viewportChanged || changeFlags.propsChanged || changeFlags.stateChanged;
@@ -147,7 +33,8 @@ export class Grid10kmLayer extends CompositeLayer<Grid10kmLayerProps> {
 
     if (!visible) return [];
 
-    const features10km = this.getVisible10kmGrids();
+    // Get visible grids directly from store (computed by ViewportManager)
+    const features10km = useMGRSStore.getState().visible10kmGrids;
     if (features10km.length === 0) return [];
 
     const featureCollection10km = {

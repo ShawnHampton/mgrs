@@ -1,84 +1,25 @@
 /**
- * 100km Grid Layer - Renders 100km MGRS squares
+ * 100km Grid Layer - Renders 100km MGRS squares from store
  * Visible at zoom 5-12
+ * 
+ * This layer only renders what's in the store - ViewportManager handles data population
  */
 
 import { CompositeLayer, Layer } from '@deck.gl/core';
 import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
-import type { MGRSLayerProps, MGRSSquareFeature, Generate100kmRequest, Generate100kmResponse } from '../types/mgrs';
-import type { GZDGeoJSON } from '../utils/generateGZD';
-import { getWorkerPool } from '../utils/WorkerPool';
-import { bboxIntersects, getBottomLeftPosition, getViewportBounds } from '../utils/viewportUtils';
+import type { MGRSLayerProps, MGRSSquareFeature } from '../types/mgrs';
+import { getBottomLeftPosition } from '../utils/viewportUtils';
+import { useMGRSStore } from '../store/mgrsStore';
+import { getViewportManager } from '../utils/viewportManager';
 
-interface Grid100kmLayerProps extends MGRSLayerProps {
-  gzdData: GZDGeoJSON;
-}
-
-export class Grid100kmLayer extends CompositeLayer<Grid100kmLayerProps> {
+export class Grid100kmLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'Grid100kmLayer';
 
-  private squares100kmCache: Map<string, MGRSSquareFeature[]> = new Map();
-  private pendingGZDs: Set<string> = new Set();
-
-  private getVisible100kmSquares(): MGRSSquareFeature[] {
-    const { gzdData } = this.props;
-    if (!gzdData) return [];
-
-    const viewport = this.context.viewport;
-    if (!viewport) return [];
-
-    const bounds = getViewportBounds(viewport);
-    if (!bounds) return [];
-
-    const { viewWest, viewSouth, viewEast, viewNorth } = bounds;
-    const allFeatures: MGRSSquareFeature[] = [];
-    const processedGZDs = new Set<string>();
-
-    for (const feature of gzdData.features) {
-      const gzdName = feature.properties.gzd;
-      
-      if (processedGZDs.has(gzdName)) continue;
-      processedGZDs.add(gzdName);
-
-      const coords = feature.geometry.coordinates;
-
-      if (!bboxIntersects(coords, viewWest, viewSouth, viewEast, viewNorth)) {
-        continue;
-      }
-
-      if (this.squares100kmCache.has(gzdName)) {
-        const cachedSquares = this.squares100kmCache.get(gzdName)!;
-        for (const square of cachedSquares) {
-          if (bboxIntersects(square.geometry.coordinates, viewWest, viewSouth, viewEast, viewNorth)) {
-            allFeatures.push(square);
-          }
-        }
-        continue;
-      }
-
-      if (!this.pendingGZDs.has(gzdName)) {
-        this.pendingGZDs.add(gzdName);
-
-        const request: Generate100kmRequest = {
-          gzd: gzdName,
-          zone: feature.properties.zone,
-          band: feature.properties.band,
-          hemisphere: feature.properties.band >= 'N' ? 'N' : 'S',
-          bounds: coords,
-        };
-
-        getWorkerPool().requestGenerate100km(request, (response: Generate100kmResponse) => {
-          this.squares100kmCache.set(response.gzd, response.features);
-          this.pendingGZDs.delete(response.gzd);
-          this.setNeedsUpdate();
-        });
-      }
-    }
-
-    return allFeatures;
-  }
-
   shouldUpdateState({ changeFlags }: any) {
+    // Trigger viewport manager on viewport changes
+    if (changeFlags.viewportChanged && this.context.viewport) {
+      getViewportManager().onViewportChange(this.context.viewport);
+    }
     return changeFlags.viewportChanged || changeFlags.propsChanged || changeFlags.stateChanged;
   }
 
@@ -97,7 +38,8 @@ export class Grid100kmLayer extends CompositeLayer<Grid100kmLayerProps> {
 
     if (!visible) return [];
 
-    const features100km = this.getVisible100kmSquares();
+    // Get visible squares directly from store (computed by ViewportManager)
+    const features100km = useMGRSStore.getState().visible100kmSquares;
     if (features100km.length === 0) return [];
 
     const featureCollection = {
