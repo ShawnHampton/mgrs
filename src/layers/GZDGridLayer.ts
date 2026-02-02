@@ -7,9 +7,11 @@ import { CompositeLayer } from '@deck.gl/core';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import type { MGRSLayerProps } from '../types/mgrs';
 import { useMGRSStore } from '../store/mgrsStore';
+import { DEFAULT_PROPS } from './layerConfig';
 
 export class GZDGridLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'GZDGridLayer';
+  static defaultProps = DEFAULT_PROPS;
 
   renderLayers() {
     const { visible, opacity, gzdLineColor, gzdLineWidth } = this.props;

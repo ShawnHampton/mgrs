@@ -10,9 +10,11 @@ import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
 import type { MGRSLayerProps, MGRSSquareFeature } from '../types/mgrs';
 import { getBottomLeftPosition } from '../utils/viewportUtils';
 import { useMGRSStore } from '../store/mgrsStore';
+import { DEFAULT_PROPS } from './layerConfig';
 
 export class Grid10kmLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'Grid10kmLayer';
+  static defaultProps = DEFAULT_PROPS;
 
   shouldUpdateState({ changeFlags }: any) {
     return changeFlags.viewportChanged || changeFlags.propsChanged || changeFlags.stateChanged;

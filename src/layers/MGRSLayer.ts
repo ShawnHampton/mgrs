@@ -8,12 +8,12 @@
  */
 
 import { CompositeLayer } from '@deck.gl/core';
+import { useMGRSStore } from '../store/mgrsStore';
 import type { MGRSLayerProps } from '../types/mgrs';
 import { GZDGridLayer } from './GZDGridLayer';
 import { Grid100kmLayer } from './Grid100kmLayer';
 import { Grid10kmLayer } from './Grid10kmLayer';
 import { DEFAULT_PROPS } from './layerConfig';
-import { useMGRSStore } from '../store/mgrsStore';
 
 export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'MGRSLayer';
@@ -25,7 +25,7 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
 
   private async loadGZDData() {
     const store = useMGRSStore.getState();
-    
+
     // Only load if not already loaded or loading
     if (store.gzdData || store.gzdLoadError) return;
 
@@ -49,18 +49,18 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
 
   renderLayers() {
     const store = useMGRSStore.getState();
-    
+
     if (!this.props.visible || !store.gzdData) return [];
 
     const zoom = this.context.viewport?.zoom || 0;
     const layers = [];
 
-    // GZD layer - visible at zoom < 7
-    if (zoom < 7) {
+    // 10km layer - visible at zoom >= 8
+    if (zoom >= 8) {
       layers.push(
-        new GZDGridLayer({
+        new Grid10kmLayer({
           ...this.props,
-          id: `${this.props.id}-gzd-layer`,
+          id: `${this.props.id}-10km-layer`,
         })
       );
     }
@@ -76,12 +76,12 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
       );
     }
 
-    // 10km layer - visible at zoom >= 8
-    if (zoom >= 8) {
+    // GZD layer - visible at zoom < 7
+    if (zoom < 7) {
       layers.push(
-        new Grid10kmLayer({
+        new GZDGridLayer({
           ...this.props,
-          id: `${this.props.id}-10km-layer`,
+          id: `${this.props.id}-gzd-layer`,
         })
       );
     }

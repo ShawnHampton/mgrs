@@ -11,9 +11,11 @@ import type { MGRSLayerProps, MGRSSquareFeature } from '../types/mgrs';
 import { getBottomLeftPosition } from '../utils/viewportUtils';
 import { useMGRSStore } from '../store/mgrsStore';
 import { getViewportManager } from '../utils/viewportManager';
+import { DEFAULT_PROPS } from './layerConfig';
 
 export class Grid100kmLayer extends CompositeLayer<MGRSLayerProps> {
   static layerName = 'Grid100kmLayer';
+  static defaultProps = DEFAULT_PROPS;
 
   shouldUpdateState({ changeFlags }: any) {
     // Trigger viewport manager on viewport changes

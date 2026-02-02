@@ -6,6 +6,7 @@ import { BitmapLayer } from '@deck.gl/layers';
 import { forward as mgrsForward } from 'mgrs';
 import { MGRSLayer } from './layers/MGRSLayer';
 import './App.css';
+import { DEFAULT_PROPS } from './layers/layerConfig';
 
 // Initial viewport - centered on Hilo, Hawaii
 const INITIAL_VIEW_STATE = {
@@ -64,6 +65,7 @@ function App() {
   const layers = useMemo(() => [
     basemapLayer,
     new MGRSLayer({
+      ...DEFAULT_PROPS,
       id: 'mgrs-grid',
       visible: true,
       opacity: 0.9,
