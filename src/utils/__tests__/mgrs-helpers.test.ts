@@ -2,8 +2,7 @@ import { Bounds, Unit } from '@ngageoint/grid-js';
 import { Grids, GridType, GridZones } from '@ngageoint/mgrs-js';
 import { describe, expect, it } from 'vitest';
 import { getZoneData } from '../mgrs-helpers';
-import * as fs from 'fs';
-import * as path from 'path';
+
 
 describe('mgrs-helpers', () => {
     describe('getZoneData', () => {
@@ -43,7 +42,6 @@ describe('mgrs-helpers', () => {
                 // With our epsilon clamping, NO point should be < -156 - slightly
                 // We check if it goes significantly past -156 to the left.
                 if (lon1 < -156.0001 || lon2 < -156.0001) {
-                    console.log(`Violation: [${lon1}, ${lat1}] -> [${lon2}, ${lat2}]`);
                     boundaryViolations++;
                 }
                 
@@ -53,7 +51,6 @@ describe('mgrs-helpers', () => {
                     const dLon = Math.abs(lon1 - lon2);
                     const dLat = Math.abs(lat1 - lat2);
                     if (dLon > 0.1 && dLat > 0.1) {
-                        console.log(`Diagonal: [${lon1}, ${lat1}] -> [${lon2}, ${lat2}]`);
                         diagonals++;
                     }
                 }
@@ -61,18 +58,7 @@ describe('mgrs-helpers', () => {
                 
             });
 
-            const geojson = {
-                type: 'FeatureCollection',
-                features: result.lines.map(line => ({
-                    type: 'Feature',
-                    properties: {},
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: line.path
-                    }
-                }))
-            };
-            fs.writeFileSync(path.join(process.cwd(), 'debug_output.geojson'), JSON.stringify(geojson, null, 2));
+
             
             expect(boundaryViolations).toBe(0);
             expect(diagonals).toBe(0);
@@ -131,7 +117,6 @@ describe('mgrs-helpers', () => {
                 const dLat = Math.abs(lat1 - lat2);
                 
                 if (dLon > threshold && dLat > threshold) {
-                    console.log(`Diagonal Line Found: [${lon1}, ${lat1}] -> [${lon2}, ${lat2}]`);
                     diagonals++;
                 }
             });

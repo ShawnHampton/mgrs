@@ -31,16 +31,49 @@ export function getZoneData(
 
   try {
     const gridLines = grid.getLines(zoom, zone, viewportBounds);
-    console.log('gridLines', zone,gridLines);
     if (gridLines) {
+      const zoneBounds = zone.getBounds();
+      const minLon = zoneBounds.getMinLongitude();
+      const maxLon = zoneBounds.getMaxLongitude();
+      const epsilon = 0.000001;
+
       for (const line of gridLines) {
         const point1 = line.getPoint1();
         const point2 = line.getPoint2();
         if (point1 && point2) {
+          let lon1 = point1.getLongitude();
+          let lat1 = point1.getLatitude();
+          let lon2 = point2.getLongitude();
+          let lat2 = point2.getLatitude();
+
+          // Check if line is completely outside
+          if ((lon1 < minLon - epsilon && lon2 < minLon - epsilon) ||
+              (lon1 > maxLon + epsilon && lon2 > maxLon + epsilon)) {
+            continue;
+          }
+
+          // Clip Point 1
+          if (lon1 < minLon) {
+             lat1 = lat1 + (lat2 - lat1) * (minLon - lon1) / (lon2 - lon1);
+             lon1 = minLon;
+          } else if (lon1 > maxLon) {
+             lat1 = lat1 + (lat2 - lat1) * (maxLon - lon1) / (lon2 - lon1);
+             lon1 = maxLon;
+          }
+
+          // Clip Point 2
+          if (lon2 < minLon) {
+             lat2 = lat2 + (lat1 - lat2) * (minLon - lon2) / (lon1 - lon2);
+             lon2 = minLon;
+          } else if (lon2 > maxLon) {
+             lat2 = lat2 + (lat1 - lat2) * (maxLon - lon2) / (lon1 - lon2);
+             lon2 = maxLon;
+          }
+
           result.lines.push({
             path: [
-              [point1.getLongitude(), point1.getLatitude()],
-              [point2.getLongitude(), point2.getLatitude()]
+              [lon1, lat1],
+              [lon2, lat2]
             ],
             gridType,
           });
