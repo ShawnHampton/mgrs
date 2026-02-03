@@ -1,8 +1,14 @@
-import { CompositeLayer, type UpdateParameters, type Viewport } from '@deck.gl/core';
+import { CompositeLayer, type UpdateParameters } from '@deck.gl/core';
 import { PathLayer, TextLayer } from '@deck.gl/layers';
-import { Grids, GridZones, GridType, type GridZone, type Grid } from '@ngageoint/mgrs-js';
-import { Bounds } from '@ngageoint/grid-js';
-import { DEFAULT_STYLES, type MGRSLayerProps, type GridStyleConfig } from '../types/types';
+import { Grids, GridType, GridZones } from '@ngageoint/mgrs-js';
+import { DEFAULT_STYLES, type GridStyleConfig, type MGRSLayerProps } from '../types/types';
+import { getZoneData, type LabelData, type LineData } from '../utils/mgrs-helpers';
+import { getViewportBounds } from '../utils/viewport-utils';
+
+// ... (GRID_TYPE_TO_STYLE map) ...
+
+// ... (Interfaces LineData and LabelData are now imported, so remove them locally) ...
+// Actually, I should remove the local interface definitions if I import them.
 
 // Map GridType enum to style keys
 const GRID_TYPE_TO_STYLE: Record<GridType, string> = {
@@ -14,17 +20,6 @@ const GRID_TYPE_TO_STYLE: Record<GridType, string> = {
   [GridType.TEN_METER]: 'TEN_METER',
   [GridType.METER]: 'METER',
 };
-
-interface LineData {
-  path: [number, number][];
-  gridType: GridType;
-}
-
-interface LabelData {
-  position: [number, number];
-  text: string;
-  gridType: GridType;
-}
 
 const defaultProps: Partial<MGRSLayerProps> = {
   showLabels: true,
@@ -42,10 +37,8 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
   private grids: Grids | null = null;
 
   initializeState(): void {
-    // Use createGZD() factory - it's pre-configured for GZD only
-    // Don't call any configuration methods as they cause TreeMap iterator errors
-    this.grids = Grids.createGZD();
-    console.log('MGRSLayer: Initialized with createGZD()');
+    // Create Grids with all types - we control which render based on zoom
+    this.grids = Grids.create();
   }
 
   shouldUpdateState({ changeFlags }: UpdateParameters<this>): boolean {
@@ -61,96 +54,34 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
     const labels: LabelData[] = [];
 
     // Get viewport bounds
-    const bounds = this.getViewportBounds(viewport);
-    if (!bounds) {
-      console.warn('MGRSLayer: No bounds available');
-      return [];
-    }
-
-    // Get grids active at this zoom level
-    const zoomGrids = this.grids.getGrids(zoom);
-    if (!zoomGrids || !zoomGrids.hasGrids()) {
-      console.warn(`MGRSLayer: No grids active at zoom ${zoom}`);
-      return [];
-    }
+    const bounds = getViewportBounds(viewport);
+    if (!bounds) return [];
 
     // Get grid zones that intersect the viewport
     const gridRange = GridZones.getGridRange(bounds);
     const zones = Array.from(gridRange);
 
-    // Get the specific GZD grid directly (more reliable than iterating TreeSet)
-    const gzdGrid = this.grids.getGrid(GridType.GZD);
-    if (!gzdGrid) {
-      console.warn('MGRSLayer: GZD grid not found');
-      return [];
+    // Define which grid types to show at which zoom levels
+    const gridConfigs: { type: GridType; minZoom: number; maxZoom: number }[] = [
+      { type: GridType.GZD, minZoom: 0, maxZoom: 20 },
+      { type: GridType.HUNDRED_KILOMETER, minZoom: 4, maxZoom: 20 },
+    ];
+
+    // Process each grid type active at this zoom
+    for (const config of gridConfigs) {
+      if (zoom < config.minZoom || zoom > config.maxZoom) continue;
+
+      const grid = this.grids.getGrid(config.type);
+      if (!grid) continue;
+
+      for (const zone of zones) {
+        const zoneData = getZoneData(grid, zone, bounds, zoom, config.type, !!this.props.showLabels);
+        lines.push(...zoneData.lines);
+        labels.push(...zoneData.labels);
+      }
     }
 
-    // Check if GZD is active at this zoom
-    if (!gzdGrid.isWithin(zoom)) {
-      console.log(`MGRSLayer: GZD not active at zoom ${zoom}`);
-      return [];
-    }
-
-    console.log(`MGRSLayer: zoom=${zoom}, zones=${zones.length}, processing GZD grid`);
-
-    // Process all GZD zones
-    for (const zone of zones) {
-      this.processZone(gzdGrid, zone, bounds, zoom, GridType.GZD, lines, labels);
-    }
-
-    console.log(`MGRSLayer: Generated ${lines.length} lines, ${labels.length} labels`);
     return this.createSubLayers(lines, labels);
-  }
-
-  private processZone(
-    grid: Grid,
-    zone: GridZone,
-    bounds: Bounds,
-    zoom: number,
-    gridType: GridType,
-    lines: LineData[],
-    labels: LabelData[]
-  ): void {
-    try {
-      // Get lines for this zone and bounds
-      const gridLines = grid.getLinesFromBounds(bounds, zone);
-      console.log(`Zone ${zone.getName()}: gridLines=${gridLines ? gridLines.length : 'null'}`);
-      if (gridLines) {
-        for (const line of gridLines) {
-          const point1 = line.getPoint1();
-          const point2 = line.getPoint2();
-          if (point1 && point2) {
-            lines.push({
-              path: [
-                [point1.getLongitude(), point1.getLatitude()],
-                [point2.getLongitude(), point2.getLatitude()],
-              ],
-              gridType,
-            });
-          }
-        }
-      }
-
-      // Get labels for this zone
-      if (this.props.showLabels) {
-        const gridLabels = grid.getLabels(zoom, zone, bounds);
-        if (gridLabels) {
-          for (const label of gridLabels) {
-            const center = label.getCenter();
-            if (center) {
-              labels.push({
-                position: [center.getLongitude(), center.getLatitude()],
-                text: label.getName() || '',
-                gridType,
-              });
-            }
-          }
-        }
-      }
-    } catch (e) {
-      // Skip zones that cause errors (e.g., polar regions)
-      console.warn(`Error processing zone ${zone.getName()}:`, e);
-    }
   }
 
   private createSubLayers(lines: LineData[], labels: LabelData[]) {
@@ -192,26 +123,8 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
 
     return layers;
   }
-
-  private getViewportBounds(viewport: Viewport): Bounds | null {
-    try {
-      // Get viewport corner coordinates
-      const nw = viewport.unproject([0, 0]);
-      const se = viewport.unproject([viewport.width, viewport.height]);
-      
-      if (!nw || !se) return null;
-
-      // Clamp to valid MGRS lat/lon ranges
-      const minLon = Math.max(-180, Math.min(nw[0], se[0]));
-      const maxLon = Math.min(180, Math.max(nw[0], se[0]));
-      const minLat = Math.max(-80, Math.min(nw[1], se[1]));
-      const maxLat = Math.min(84, Math.max(nw[1], se[1]));
-
-      return Bounds.bounds(minLon, minLat, maxLon, maxLat);
-    } catch {
-      return null;
-    }
-  }
+  
+  // getViewportBounds moved to utility
 
   private getStyle(gridType: GridType): GridStyleConfig {
     const styleKey = GRID_TYPE_TO_STYLE[gridType] || 'GZD';
@@ -236,3 +149,5 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
     return this.getStyle(gridType).labelSize || 12;
   }
 }
+
+

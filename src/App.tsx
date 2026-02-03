@@ -1,16 +1,17 @@
 import { useState, useCallback, useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
-import { MapView } from '@deck.gl/core';
+import { MapView, WebMercatorViewport } from '@deck.gl/core';
 import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
 import { MGRSLayer } from './layers/MGRSLayer';
+import { ExportControl } from './components/ExportControl';
 import './App.css';
 
 // Initial viewport - centered on Hilo, Hawaii
 const INITIAL_VIEW_STATE = {
   longitude: -155.0868,
   latitude: 19.7241,
-  zoom: 4,
+  zoom: 7,
   pitch: 0,
   bearing: 0
 };
@@ -38,17 +39,26 @@ const basemapLayer = new TileLayer({
 function App() {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cursorPosition, setCursorPosition] = useState<{ lon: number; lat: number } | null>(null);
+  const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
 
-  const onViewStateChange = useCallback(({ viewState }: { viewState: typeof INITIAL_VIEW_STATE }) => {
+  const onViewStateChange = useCallback(({ viewState }: any) => {
     setViewState(viewState);
   }, []);
 
-  const onHover = useCallback((info: { coordinate?: [number, number] }) => {
+  const onResize = useCallback((dimensions: { width: number; height: number }) => {
+     setViewport({
+         width: dimensions.width,
+         height: dimensions.height
+     });
+  }, []);
+
+  const onHover = useCallback((info: any) => {
     if (info.coordinate) {
-      let lon = info.coordinate[0];
+      const coord = info.coordinate as [number, number];
+      let lon = coord[0];
       while (lon > 180) lon -= 360;
       while (lon < -180) lon += 360;
-      setCursorPosition({ lon, lat: info.coordinate[1] });
+      setCursorPosition({ lon, lat: coord[1] });
     }
   }, []);
 
@@ -59,6 +69,29 @@ function App() {
     new MGRSLayer({ id: 'mgrs-grid' }),
   ], []);
 
+  // Compute viewport for export
+  const exportViewport = useMemo(() => {
+    if (!viewport) return undefined;
+    
+    // Create a temporary WebMercatorViewport for projection
+    // @ts-ignore - WebMercatorViewport constructor type mismatch in some deck.gl versions
+    const startViewport = new WebMercatorViewport({
+      width: viewport.width,
+      height: viewport.height,
+      longitude: viewState.longitude,
+      latitude: viewState.latitude,
+      zoom: viewState.zoom,
+      pitch: viewState.pitch,
+      bearing: viewState.bearing
+    });
+    
+    return {
+        width: viewport.width,
+        height: viewport.height,
+        unproject: (xy: [number, number]) => startViewport.unproject(xy) as [number, number]
+    };
+  }, [viewport, viewState]);
+  
   return (
     <div className="app">
       <DeckGL
@@ -68,7 +101,11 @@ function App() {
         controller={true}
         layers={layers}
         onHover={onHover}
-      />
+        width="100%"
+        height="100%"
+        onResize={onResize}
+      >
+      </DeckGL>
       
       <div className="info-panel">
         <h3>Map Viewer</h3>
@@ -84,6 +121,11 @@ function App() {
             </span>
           </div>
         )}
+        
+        <ExportControl 
+            viewState={viewState} 
+            viewport={exportViewport} 
+        />
       </div>
     </div>
   );
