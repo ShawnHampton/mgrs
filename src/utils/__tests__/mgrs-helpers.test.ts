@@ -182,5 +182,58 @@ describe('mgrs-helpers', () => {
             expect(boundaryViolations).toBe(0);
             expect(diagonals).toBe(0);
         });
+
+        it('should clamp specific points for Zone 5Q 1km to avoid diagonal artifacts', () => {
+            const grids = Grids.create();
+            const grid1k = grids.getGrid(GridType.KILOMETER);
+            
+            // Setup viewport crossing zone 4Q/5Q boundary (-156)
+            const viewportBounds = Bounds.bounds(-157, 19, -155, 23, Unit.DEGREE);
+            const gridRange = GridZones.getGridRange(viewportBounds);
+            const zones = Array.from(gridRange);
+            const zone5Q = zones.find(z => z.getName() === '5Q');
+            
+            expect(zone5Q).toBeDefined();
+            if (!zone5Q || !grid1k) return;
+
+            const zoom = 12; // Zoom 12 for 1km grid
+            const result = getZoneData(grid1k, zone5Q, viewportBounds, zoom, GridType.KILOMETER, false);
+            
+            expect(result.lines.length).toBeGreaterThan(0);
+            
+            // Check for boundary violations
+            let boundaryViolations = 0;
+            let diagonals = 0;
+            
+            result.lines.forEach(line => {
+                const path = line.path;
+                const p1 = path[0];
+                const p2 = path[1];
+                
+                const lon1 = p1[0];
+                const lat1 = p1[1];
+                const lon2 = p2[0];
+                const lat2 = p2[1];
+                
+                // Zone 5Q starts at -156. 
+                if (lon1 < -156.0001 || lon2 < -156.0001) {
+                    boundaryViolations++;
+                }
+                
+                // Check for diagonals near boundary
+                const nearBoundary = (Math.abs(lon1 - (-156)) < 0.1 || Math.abs(lon2 - (-156)) < 0.1);
+                if (nearBoundary) {
+                    const dLon = Math.abs(lon1 - lon2);
+                    const dLat = Math.abs(lat1 - lat2);
+                    
+                    if (dLon > 0.1 && dLat > 0.1) {
+                        diagonals++;
+                    }
+                }
+            });
+            
+            expect(boundaryViolations).toBe(0);
+            expect(diagonals).toBe(0);
+        });
     });
 });
