@@ -37,13 +37,13 @@ export const DEFAULT_STYLES: Record<string, GridStyleConfig> = {
     labelSize: 14,
   },
   HUNDRED_KILOMETER: {
-    lineColor: [59, 130, 246, 200],   // blue-500
+    lineColor: [59, 130, 246, 255],   // blue-500
     lineWidth: 2,
     labelColor: [59, 130, 246, 255],
     labelSize: 12,
   },
   TEN_KILOMETER: {
-    lineColor: [34, 197, 94, 200],    // green-500
+    lineColor: [34, 197, 94, 255],    // green-500
     lineWidth: 1.5,
     labelColor: [34, 197, 94, 255],
     labelSize: 10,
