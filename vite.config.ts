@@ -10,4 +10,17 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    include: [
+      '@ngageoint/mgrs-js',
+      '@ngageoint/grid-js',
+    ],
+    exclude: ['js_cols'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/js_cols/, /node_modules/],
+      transformMixedEsModules: true,
+    },
+  },
 })

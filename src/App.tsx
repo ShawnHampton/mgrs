@@ -1,19 +1,16 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { MapView } from '@deck.gl/core';
 import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
-import { forward as mgrsForward } from 'mgrs';
 import { MGRSLayer } from './layers/MGRSLayer';
 import './App.css';
-import { DEFAULT_PROPS } from './layers/layerConfig';
 
 // Initial viewport - centered on Hilo, Hawaii
 const INITIAL_VIEW_STATE = {
   longitude: -155.0868,
   latitude: 19.7241,
-  zoom: 4
-  ,
+  zoom: 4,
   pitch: 0,
   bearing: 0
 };
@@ -41,7 +38,6 @@ const basemapLayer = new TileLayer({
 function App() {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cursorPosition, setCursorPosition] = useState<{ lon: number; lat: number } | null>(null);
-  const [showLabels, setShowLabels] = useState(false);
 
   const onViewStateChange = useCallback(({ viewState }: { viewState: typeof INITIAL_VIEW_STATE }) => {
     setViewState(viewState);
@@ -49,7 +45,6 @@ function App() {
 
   const onHover = useCallback((info: { coordinate?: [number, number] }) => {
     if (info.coordinate) {
-      // Normalize longitude to -180 to 180 range
       let lon = info.coordinate[0];
       while (lon > 180) lon -= 360;
       while (lon < -180) lon += 360;
@@ -57,21 +52,12 @@ function App() {
     }
   }, []);
 
-  // Memoize MapView to prevent recreation
   const mapView = useMemo(() => new MapView({ id: 'map', controller: true, repeat: true }), []);
 
-  // Memoize layers to prevent unnecessary recreation
-  // Don't include viewState.zoom in deps - layer should persist and re-render automatically
   const layers = useMemo(() => [
     basemapLayer,
-    new MGRSLayer({
-      ...DEFAULT_PROPS,
-      id: 'mgrs-grid',
-      visible: true,
-      opacity: 0.9,
-      showLabels
-    })
-  ], [showLabels]);
+    new MGRSLayer({ id: 'mgrs-grid' }),
+  ], []);
 
   return (
     <div className="app">
@@ -84,71 +70,20 @@ function App() {
         onHover={onHover}
       />
       
-      {/* Info overlay */}
       <div className="info-panel">
-        <h3>MGRS Grid Viewer</h3>
+        <h3>Map Viewer</h3>
         <div className="info-row">
           <span>Zoom:</span>
           <span>{viewState.zoom.toFixed(1)}</span>
         </div>
         {cursorPosition && (
-          <>
-            <div className="info-row">
-              <span>Position:</span>
-              <span>
-                {cursorPosition.lat.toFixed(4)}°, {cursorPosition.lon.toFixed(4)}°
-              </span>
-            </div>
-            <div className="info-row">
-              <span>MGRS:</span>
-              <span>
-                {(() => {
-                  const mgrs = mgrsForward([cursorPosition.lon, cursorPosition.lat], 5);
-                  // Format: ZZ ZZ AA EEEE NNNN
-                  const match = mgrs.match(/^(\d{1,2})([A-Z])([A-Z]{2})(\d+)$/);
-                  if (match) {
-                    const [, zone, band, square, coords] = match;
-                    const easting = coords.slice(0, coords.length / 2);
-                    const northing = coords.slice(coords.length / 2);
-                    return `${zone}${band} ${square} ${easting} ${northing}`;
-                  }
-                  return mgrs;
-                })()}
-              </span>
-            </div>
-          </>
+          <div className="info-row">
+            <span>Position:</span>
+            <span>
+              {cursorPosition.lat.toFixed(4)}°, {cursorPosition.lon.toFixed(4)}°
+            </span>
+          </div>
         )}
-        <div className="legend">
-          <div className="legend-item toggle-row">
-            <label className="toggle-label">
-              <span>Show Labels</span>
-              <button
-                className={`toggle-switch${showLabels ? ' active' : ''}`}
-                role="switch"
-                aria-checked={showLabels}
-                onClick={() => setShowLabels(v => !v)}
-              >
-                <span className="toggle-knob" />
-              </button>
-            </label>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line gzd"></span>
-            <span>GZD Boundaries</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line grid-100km"></span>
-            <span>100km Grid</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line grid-10km"></span>
-            <span>10km Grid</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line grid-1km"></span>
-            <span>1km Grid</span>
-          </div>
-        </div>
       </div>
     </div>
   );
