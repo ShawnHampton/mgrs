@@ -4,7 +4,10 @@ import { MapView, WebMercatorViewport } from '@deck.gl/core';
 import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
 import { MGRSLayer } from './layers/MGRSLayer';
+import { SelectionOverlayLayer } from './layers/SelectionOverlayLayer';
 import { ExportControl } from './components/ExportControl';
+import { useSelectionStore } from './store/selectionStore';
+import { getActiveGridType, getCellAtPosition } from './utils/cell-utils';
 import './App.css';
 
 // Initial viewport - centered on Hilo, Hawaii
@@ -23,9 +26,9 @@ const basemapLayer = new TileLayer({
   minZoom: 0,
   maxZoom: 19,
   tileSize: 256,
-  renderSubLayers: (props: { id: string; data: ImageBitmap; tile: { bbox: { west: number; south: number; east: number; north: number } } }) => {
+  renderSubLayers: (props: any) => {
     const { tile, data } = props;
-    const { bbox } = tile;
+    const { bbox } = tile as { bbox: { west: number; south: number; east: number; north: number } };
 
     return new BitmapLayer({
       ...props,
@@ -40,6 +43,14 @@ function App() {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cursorPosition, setCursorPosition] = useState<{ lon: number; lat: number } | null>(null);
   const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
+
+  const selectionEnabled = useSelectionStore((s) => s.selectionEnabled);
+  const hoveredCell = useSelectionStore((s) => s.hoveredCell);
+  const selectedCells = useSelectionStore((s) => s.selectedCells);
+  const setSelectionEnabled = useSelectionStore((s) => s.setSelectionEnabled);
+  const setHoveredCell = useSelectionStore((s) => s.setHoveredCell);
+  const toggleSelectedCell = useSelectionStore((s) => s.toggleSelectedCell);
+  const clearSelection = useSelectionStore((s) => s.clearSelection);
 
   const onViewStateChange = useCallback(({ viewState }: any) => {
     setViewState(viewState);
@@ -59,20 +70,48 @@ function App() {
       while (lon > 180) lon -= 360;
       while (lon < -180) lon += 360;
       setCursorPosition({ lon, lat: coord[1] });
+
+      if (selectionEnabled) {
+        const gridType = getActiveGridType(Math.floor(viewState.zoom));
+        if (gridType != null) {
+          const cell = getCellAtPosition(lon, coord[1], gridType);
+          setHoveredCell(cell);
+        } else {
+          setHoveredCell(null);
+        }
+      }
     }
-  }, []);
+  }, [selectionEnabled, viewState.zoom, setHoveredCell]);
+
+  const onClick = useCallback((info: any) => {
+    if (!selectionEnabled || !info.coordinate) return;
+    const current = useSelectionStore.getState().hoveredCell;
+    if (current) {
+      toggleSelectedCell(current);
+    }
+  }, [selectionEnabled, toggleSelectedCell]);
 
   const mapView = useMemo(() => new MapView({ id: 'map', controller: true, repeat: true }), []);
 
   const layers = useMemo(() => [
     basemapLayer,
     new MGRSLayer({ id: 'mgrs-grid' }),
-  ], []);
+    new SelectionOverlayLayer({
+      id: 'selection-overlay',
+      hoveredCell,
+      selectedCells,
+    }),
+  ], [hoveredCell, selectedCells]);
+
+  const getCursor = useCallback(
+    () => (selectionEnabled ? 'crosshair' : 'grab'),
+    [selectionEnabled],
+  );
 
   // Compute viewport for export
   const exportViewport = useMemo(() => {
     if (!viewport) return undefined;
-    
+
     // Create a temporary WebMercatorViewport for projection
     // @ts-ignore - WebMercatorViewport constructor type mismatch in some deck.gl versions
     const startViewport = new WebMercatorViewport({
@@ -84,14 +123,14 @@ function App() {
       pitch: viewState.pitch,
       bearing: viewState.bearing
     });
-    
+
     return {
         width: viewport.width,
         height: viewport.height,
         unproject: (xy: [number, number]) => startViewport.unproject(xy) as [number, number]
     };
   }, [viewport, viewState]);
-  
+
   return (
     <div className="app">
       <DeckGL
@@ -101,12 +140,14 @@ function App() {
         controller={true}
         layers={layers}
         onHover={onHover}
+        onClick={onClick}
+        getCursor={getCursor}
         width="100%"
         height="100%"
         onResize={onResize}
       >
       </DeckGL>
-      
+
       <div className="info-panel">
         <h3>Map Viewer</h3>
         <div className="info-row">
@@ -121,10 +162,38 @@ function App() {
             </span>
           </div>
         )}
-        
-        <ExportControl 
-            viewState={viewState} 
-            viewport={exportViewport} 
+
+        <div className="selection-section">
+          <button
+            className={`selection-toggle ${selectionEnabled ? 'active' : ''}`}
+            onClick={() => setSelectionEnabled(!selectionEnabled)}
+          >
+            {selectionEnabled ? 'Selection ON' : 'Selection OFF'}
+          </button>
+
+          {selectionEnabled && hoveredCell && (
+            <div className="info-row">
+              <span>Cell:</span>
+              <span>{hoveredCell.mgrsId}</span>
+            </div>
+          )}
+
+          {selectedCells.size > 0 && (
+            <div className="selection-info">
+              <div className="info-row">
+                <span>Selected:</span>
+                <span>{selectedCells.size}</span>
+              </div>
+              <button className="clear-btn" onClick={clearSelection}>
+                Clear
+              </button>
+            </div>
+          )}
+        </div>
+
+        <ExportControl
+            viewState={viewState}
+            viewport={exportViewport}
         />
       </div>
     </div>

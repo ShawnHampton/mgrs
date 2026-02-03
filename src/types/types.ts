@@ -1,4 +1,15 @@
 import type { CompositeLayerProps, Color } from '@deck.gl/core';
+import type { GridType } from '@ngageoint/mgrs-js';
+
+export interface CellPolygon {
+  ring: [number, number][]; // closed ring of [lon, lat] coords
+}
+
+export interface CellEntry {
+  mgrsId: string;
+  gridType: GridType;
+  polygon: CellPolygon;
+}
 
 /**
  * MGRS grid type styling configuration
