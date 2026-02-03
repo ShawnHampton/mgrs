@@ -65,6 +65,7 @@ export class MGRSLayer extends CompositeLayer<MGRSLayerProps> {
     const gridConfigs: { type: GridType; minZoom: number; maxZoom: number }[] = [
       { type: GridType.GZD, minZoom: 0, maxZoom: 20 },
       { type: GridType.HUNDRED_KILOMETER, minZoom: 4, maxZoom: 20 },
+      { type: GridType.TEN_KILOMETER, minZoom: 8, maxZoom: 20 },
     ];
 
     // Process each grid type active at this zoom
