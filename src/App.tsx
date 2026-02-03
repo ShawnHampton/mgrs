@@ -5,6 +5,7 @@ import { TileLayer } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
 import { forward as mgrsForward } from 'mgrs';
 import { MGRSLayer } from './layers/MGRSLayer';
+import { useMGRSStore } from './store/mgrsStore';
 import './App.css';
 import { DEFAULT_PROPS } from './layers/layerConfig';
 
@@ -42,6 +43,21 @@ function App() {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cursorPosition, setCursorPosition] = useState<{ lon: number; lat: number } | null>(null);
   const [showLabels, setShowLabels] = useState(false);
+
+  const exportVisible10kmGeoJSON = useCallback(() => {
+    const features = useMGRSStore.getState().all10kmFeatures;
+    const geojson = {
+      type: 'FeatureCollection',
+      features,
+    };
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/geo+json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mgrs-10km-visible-${features.length}features.geojson`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
 
   const onViewStateChange = useCallback(({ viewState }: { viewState: typeof INITIAL_VIEW_STATE }) => {
     setViewState(viewState);
@@ -131,6 +147,11 @@ function App() {
                 <span className="toggle-knob" />
               </button>
             </label>
+          </div>
+          <div className="legend-item toggle-row">
+            <button className="export-btn" onClick={exportVisible10kmGeoJSON}>
+              Export Visible 10km GeoJSON
+            </button>
           </div>
           <div className="legend-item">
             <span className="legend-line gzd"></span>

@@ -322,10 +322,10 @@ self.onmessage = (event: MessageEvent) => {
       const req = payload as Generate10kmRequest;
       // DEBUG LOGGING for problematic squares
       if (req.squareId.startsWith('05QK') || req.squareId.startsWith('05QKB')) {
-        console.log(`[Worker] Generating 10km grid for ${req.squareId}. Zone: ${req.zone}, Hemisphere: ${req.hemisphere}`);
+        console.log(`[Worker] Generating 10km grid for ${req.squareId}. Zone: ${req.zone}, Hemisphere: ${req.hemisphere}, UTM bounds: ${req.utmBounds}`);
       }
 
-      const features = generate10kmGridForSquare(req.zone, req.hemisphere, req.bounds, req.squareId);
+      const features = generate10kmGridForSquare(req.zone, req.hemisphere, req.bounds, req.squareId, req.utmBounds);
       
       if (req.squareId.startsWith('05QK')) {
         console.log(`[Worker] Generated ${features.length} features for ${req.squareId}`);

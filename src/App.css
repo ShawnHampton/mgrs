@@ -136,6 +136,23 @@
   transform: translateX(16px);
 }
 
+/* Export button */
+.export-btn {
+  width: 100%;
+  padding: 6px 12px;
+  background: rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.export-btn:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
 /* Reset default styles */
 * {
   margin: 0;

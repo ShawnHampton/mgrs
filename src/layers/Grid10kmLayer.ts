@@ -1,8 +1,8 @@
 /**
  * 10km Grid Layer - Renders 10km MGRS grid cells from store
  * Visible at zoom >= 8
- * 
- * This layer only renders what's in the store - ViewportManager handles data population
+ *
+ * Reads directly from the store's append-only all10kmFeatures array.
  */
 
 import { CompositeLayer, Layer } from '@deck.gl/core';
@@ -35,8 +35,16 @@ export class Grid10kmLayer extends CompositeLayer<MGRSLayerProps> {
 
     if (!visible) return [];
 
-    // Get visible grids directly from store (computed by ViewportManager)
-    const features10km = useMGRSStore.getState().visible10kmGrids;
+    // Read directly from the append-only flat array — filtered to 05QKB only for debugging
+    const allFeatures = useMGRSStore.getState().all10kmFeatures;
+    
+    // DEBUG: Log first feature to see what we have
+    if (allFeatures.length > 0) {
+      console.log(`[Grid10kmLayer] First feature props:`, JSON.stringify(allFeatures[0].properties));
+    }
+    
+    const features10km = allFeatures.filter(f => f.properties.gzd === '05Q' && f.properties.id.startsWith('05QKB'));
+    console.log(`[Grid10kmLayer] all=${allFeatures.length}, 05QKB=${features10km.length}`);
     if (features10km.length === 0) return [];
 
     const featureCollection10km = {

@@ -9,12 +9,12 @@
  * 5. Label each square using mgrs.forward() for authoritative MGRS IDs
  */
 
-import proj4 from 'proj4';
-import { forward as mgrsForward } from 'mgrs';
-import GeometryFactory from 'jsts/org/locationtech/jts/geom/GeometryFactory';
 import Coordinate from 'jsts/org/locationtech/jts/geom/Coordinate';
-import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp';
+import GeometryFactory from 'jsts/org/locationtech/jts/geom/GeometryFactory';
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp';
+import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp';
+import { forward as mgrsForward } from 'mgrs';
+import proj4 from 'proj4';
 import type { MGRSSquareFeature } from '../types/mgrs';
 
 // JSTS v2 type declarations are incomplete — many runtime methods
@@ -27,8 +27,8 @@ const geometryFactory = new GeometryFactory();
 // UTM projection string cache
 const UTM_PROJ_CACHE: Map<number, string> = new Map();
 
-function getUTMProjection(zone: number, hemisphere: 'N' | 'S'): string {
-  const epsg = hemisphere === 'N' ? 32600 + zone : 32700 + zone;
+function getUTMProjection(zone: string, hemisphere: 'N' | 'S'): string {
+  const epsg = hemisphere === 'N' ? 32600 + parseInt(zone, 10) : 32700 + parseInt(zone, 10);
   if (!UTM_PROJ_CACHE.has(epsg)) {
     const proj = `+proj=utm +zone=${zone} ${hemisphere === 'S' ? '+south' : ''} +datum=WGS84 +units=m +no_defs`;
     UTM_PROJ_CACHE.set(epsg, proj);
@@ -36,13 +36,13 @@ function getUTMProjection(zone: number, hemisphere: 'N' | 'S'): string {
   return UTM_PROJ_CACHE.get(epsg)!;
 }
 
-function utmToLatLon(easting: number, northing: number, zone: number, hemisphere: 'N' | 'S'): [number, number] {
+function utmToLatLon(easting: number, northing: number, zone: string, hemisphere: 'N' | 'S'): [number, number] {
   const utmProj = getUTMProjection(zone, hemisphere);
   const [lon, lat] = proj4(utmProj, 'WGS84', [easting, northing]);
   return [lon, lat];
 }
 
-function latLonToUTM(lon: number, lat: number, zone: number, hemisphere: 'N' | 'S'): [number, number] {
+function latLonToUTM(lon: number, lat: number, zone: string, hemisphere: 'N' | 'S'): [number, number] {
   const utmProj = getUTMProjection(zone, hemisphere);
   const [easting, northing] = proj4('WGS84', utmProj, [lon, lat]);
   return [easting, northing];
@@ -64,7 +64,7 @@ function utmRectToWGS84Polygon(
   eMin: number,
   nMin: number,
   size: number,
-  zone: number,
+  zone: string,
   hemisphere: 'N' | 'S',
   samplesPerEdge: number = 20
 ): number[][] {
@@ -140,13 +140,14 @@ function jstsToGeoJSONCoords(geom: JSTSGeometry): number[][][][] {
  * Generate all 100km MGRS square features for a single GZD.
  */
 export function generate100kmSquaresForGZD(
-  zone: number,
+  zone: string,
   band: string,
   hemisphere: 'N' | 'S',
   gzdPolygonCoords: number[][][]
 ): MGRSSquareFeature[] {
   const features: MGRSSquareFeature[] = [];
-  const gzdName = `${zone.toString().padStart(2, '0')}${band}`;
+  const gzdName = `${zone}${band}`;
+  console.log('Generating 100km squares for GZD:', gzdName, zone, band, hemisphere);
 
   // Build JSTS geometry for the GZD boundary
   // buffer(0) repairs any self-intersections from projection artifacts
@@ -241,6 +242,15 @@ export function generate100kmSquaresForGZD(
         const squareId = mgrsString.replace(/^(\d{1,2})([A-Z])/, '');
         const fullId = mgrsString;
 
+        // Store the original UTM bounds from the grid generation
+        // These are the actual 100km cell boundaries we're iterating over
+        const utmBounds: [number, number, number, number] = [
+          e,
+          n,
+          e + gridSize,
+          n + gridSize
+        ];
+
         // Convert intersection geometry to GeoJSON coordinates
         const polyCoords = jstsToGeoJSONCoords(intersection);
 
@@ -251,6 +261,7 @@ export function generate100kmSquaresForGZD(
               id: fullId,
               squareId,
               gzd: gzdName,
+              utmBounds,
             },
             geometry: {
               type: 'Polygon',

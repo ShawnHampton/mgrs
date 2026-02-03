@@ -59,6 +59,7 @@ export interface MGRSSquareFeature {
     id: string;        // e.g., "18SUJ" - full MGRS grid zone + square ID
     squareId: string;  // e.g., "UJ" - 2-letter 100km square ID
     gzd: string;       // e.g., "18S" - parent GZD
+    utmBounds?: [number, number, number, number]; // [minE, minN, maxE, maxN] - exact UTM extent
   };
   geometry: {
     type: 'Polygon';
@@ -87,6 +88,7 @@ export interface Generate10kmRequest {
   zone: string;
   hemisphere: 'N' | 'S';
   bounds: number[][][];   // 100km square polygon coordinates
+  utmBounds?: [number, number, number, number]; // [minE, minN, maxE, maxN] - exact UTM extent
 }
 
 // Worker response with generated 10km grid cell features

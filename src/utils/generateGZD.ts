@@ -29,9 +29,10 @@ export function generateGZDGeoJSON(): GZDGeoJSON {
   const features: GZDFeature[] = [];
 
   // UTM zones: 1-60, each 6° wide
-  for (let zone = 1; zone <= 60; zone++) {
-    const west = (zone - 1) * 6 - 180;
-    const east = zone * 6 - 180;
+  for (let zoneNum = 1; zoneNum <= 60; zoneNum++) {
+    const zone = zoneNum.toString().padStart(2, '0');
+    const west = (zoneNum - 1) * 6 - 180;
+    const east = zoneNum * 6 - 180;
 
     // Latitude bands (8° each, except X which is 12°)
     for (let i = 0; i < LATITUDE_BANDS.length; i++) {
@@ -53,18 +54,18 @@ export function generateGZDGeoJSON(): GZDGeoJSON {
       //    Zone 31V extends east to 9°E (covers western half of what would be 32V)
       //    Zone 32V doesn't exist
       if (band === 'V') {
-        if (zone === 31) {
+        if (zoneNum === 31) {
           // Zone 31V: 0°E to 9°E (extended 3° east)
           features.push({
             type: 'Feature',
-            properties: { gzd: '31V', zone: 31, band: 'V' },
+            properties: { gzd: '31V', zone: '31', band: 'V' },
             geometry: {
               type: 'Polygon',
               coordinates: [[[0, south], [9, south], [9, north], [0, north], [0, south]]]
             }
           });
           continue;
-        } else if (zone === 32) {
+        } else if (zoneNum === 32) {
           // Zone 32V doesn't exist - skip it
           continue;
         }
@@ -74,13 +75,13 @@ export function generateGZDGeoJSON(): GZDGeoJSON {
       //    Zones are irregular widths, many zones don't exist
       if (band === 'X') {
         // Zones 31X, 32X don't exist
-        if (zone === 31 || zone === 32) continue;
+        if (zoneNum === 31 || zoneNum === 32) continue;
         
         // Zone 33X: 0°E to 12°E (covers what would be 31X and normal 33X)
-        if (zone === 33) {
+        if (zoneNum === 33) {
           features.push({
             type: 'Feature',
-            properties: { gzd: '33X', zone: 33, band: 'X' },
+            properties: { gzd: '33X', zone: '33', band: 'X' },
             geometry: {
               type: 'Polygon',
               coordinates: [[[0, south], [12, south], [12, north], [0, north], [0, south]]]
@@ -90,13 +91,13 @@ export function generateGZDGeoJSON(): GZDGeoJSON {
         }
         
         // Zone 34X doesn't exist
-        if (zone === 34) continue;
+        if (zoneNum === 34) continue;
         
         // Zone 35X: 12°E to 24°E (covers what would be normal 33X and 35X)
-        if (zone === 35) {
+        if (zoneNum === 35) {
           features.push({
             type: 'Feature',
-            properties: { gzd: '35X', zone: 35, band: 'X' },
+            properties: { gzd: '35X', zone: '35', band: 'X' },
             geometry: {
               type: 'Polygon',
               coordinates: [[[12, south], [24, south], [24, north], [12, north], [12, south]]]
@@ -106,13 +107,13 @@ export function generateGZDGeoJSON(): GZDGeoJSON {
         }
         
         // Zone 36X doesn't exist
-        if (zone === 36) continue;
+        if (zoneNum === 36) continue;
         
         // Zone 37X: 24°E to 36°E (covers what would be normal 35X and 37X)
-        if (zone === 37) {
+        if (zoneNum === 37) {
           features.push({
             type: 'Feature',
-            properties: { gzd: '37X', zone: 37, band: 'X' },
+            properties: { gzd: '37X', zone: '37', band: 'X' },
             geometry: {
               type: 'Polygon',
               coordinates: [[[24, south], [36, south], [36, north], [24, north], [24, south]]]

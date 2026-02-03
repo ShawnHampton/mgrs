@@ -1,6 +1,6 @@
 /**
  * Viewport Manager - Manages MGRS data generation based on viewport changes
- * 
+ *
  * This utility monitors viewport changes and ensures the store is populated
  * with the appropriate MGRS squares for the current view.
  */
@@ -13,8 +13,10 @@ import type { Generate100kmRequest, Generate100kmResponse } from '../types/mgrs'
 
 class ViewportManager {
   private pendingGZDs: Set<string> = new Set();
-  private pending100kmSquares: Set<string> = new Set();
-  private lastViewport: { zoom: number; bounds: any } | null = null;
+
+  // Plain object to track which 100km squares have already been requested for 10km generation.
+  // Once requested, never re-requested. No deletion, no clearing.
+  private requested10km: Record<string, boolean> = {};
 
   /**
    * Update 100km squares based on current viewport
@@ -22,7 +24,7 @@ class ViewportManager {
   update100kmSquares(viewport: Viewport) {
     const store = useMGRSStore.getState();
     const gzdData = store.gzdData;
-    
+
     if (!gzdData) return;
 
     const bounds = getViewportBounds(viewport);
@@ -35,7 +37,7 @@ class ViewportManager {
     // Check which GZDs are visible and collect their squares
     for (const feature of gzdData.features) {
       const gzdName = feature.properties.gzd;
-      
+
       if (processedGZDs.has(gzdName)) continue;
       processedGZDs.add(gzdName);
 
@@ -85,12 +87,15 @@ class ViewportManager {
   }
 
   /**
-   * Update 10km grids based on current viewport
+   * Request 10km grid generation for visible 100km squares.
+   *
+   * No caching, no visibility filtering of results.
+   * The callback appends directly to the store's flat array.
    */
   update10kmGrids(viewport: Viewport) {
     const store = useMGRSStore.getState();
     const gzdData = store.gzdData;
-    
+
     if (!gzdData) return;
 
     const bounds = getViewportBounds(viewport);
@@ -99,12 +104,11 @@ class ViewportManager {
     const { viewWest, viewSouth, viewEast, viewNorth } = bounds;
 
     // Get all visible 100km squares
-    const visible100kmSquares: any[] = [];
     const processedGZDs = new Set<string>();
 
     for (const feature of gzdData.features) {
       const gzdName = feature.properties.gzd;
-      
+
       if (processedGZDs.has(gzdName)) continue;
       processedGZDs.add(gzdName);
 
@@ -114,33 +118,18 @@ class ViewportManager {
       }
 
       const cachedSquares = store.getSquares100km(gzdName);
-      if (cachedSquares) {
-        for (const square of cachedSquares) {
-          if (bboxIntersects(square.geometry.coordinates, viewWest, viewSouth, viewEast, viewNorth)) {
-            visible100kmSquares.push(square);
-          }
+      if (!cachedSquares) continue;
+
+      for (const square of cachedSquares) {
+        if (!bboxIntersects(square.geometry.coordinates, viewWest, viewSouth, viewEast, viewNorth)) {
+          continue;
         }
-      }
-    }
 
-    // Collect visible 10km grids
-    const visible10kmGrids: any[] = [];
+        const squareId = square.properties.id;
 
-    // Request 10km grids for visible 100km squares
-    for (const square of visible100kmSquares) {
-      const squareId = square.properties.id;
-
-      // Check if we already have this square's 10km grids
-      const cachedGrids = store.getGrids10km(squareId);
-      if (cachedGrids) {
-        // Add all grids from this square (they're already filtered to the square bounds)
-        visible10kmGrids.push(...cachedGrids);
-        continue;
-      }
-
-      // Request generation if not already pending
-      if (!this.pending100kmSquares.has(squareId)) {
-        this.pending100kmSquares.add(squareId);
+        // Already requested? Skip. (simple object lookup, no Set)
+        if (this.requested10km[squareId]) continue;
+        this.requested10km[squareId] = true;
 
         const match = squareId.match(/^(\d{2})([A-Z])/);
         if (!match) {
@@ -152,30 +141,34 @@ class ViewportManager {
         const band = match[2];
         const hemisphere: 'N' | 'S' = band >= 'N' ? 'N' : 'S';
 
+        // Get UTM bounds from properties (added by generate100kmSquares)
+        const utmBounds = square.properties?.utmBounds;
+        
+        if (squareId === '05QKB') {
+          console.log(`[ViewportManager] UTM bounds for ${squareId}:`, utmBounds);
+        }
+
         getWorkerPool().requestGenerate10km(
           {
             squareId,
             zone,
             hemisphere,
             bounds: square.geometry.coordinates,
+            utmBounds,
           },
           (response) => {
-            const store = useMGRSStore.getState();
-            store.setGrids10km(response.squareId, response.features);
-            this.pending100kmSquares.delete(response.squareId);
-            // Trigger a re-computation of visible grids
-            this.update10kmGrids(viewport);
+            console.log(`[ViewportManager] 10km callback for ${response.squareId}: ${response.features.length} features received`);
+            // Directly append to the flat array — no Maps, no recomputation
+            useMGRSStore.getState().append10kmFeatures(response.features);
           },
           (error) => {
             console.error(`[ViewportManager] Error generating 10km grids for ${squareId}:`, error);
-            this.pending100kmSquares.delete(squareId);
+            // Allow retry
+            this.requested10km[squareId] = false;
           }
         );
       }
     }
-
-    // Update the store with visible grids for rendering
-    store.setVisible10kmGrids(visible10kmGrids);
   }
 
   /**
@@ -211,7 +204,7 @@ class ViewportManager {
    */
   clearPending() {
     this.pendingGZDs.clear();
-    this.pending100kmSquares.clear();
+    this.requested10km = {};
   }
 }
 

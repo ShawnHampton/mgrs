@@ -19,18 +19,13 @@ interface MGRSStore {
   getSquares100km: (gzd: string) => MGRSSquareFeature[] | undefined;
   clearSquares100km: () => void;
 
-  // 10km grids cache - keyed by 100km square ID
-  grids10km: Map<string, MGRSSquareFeature[]>;
-  setGrids10km: (squareId: string, grids: MGRSSquareFeature[]) => void;
-  getGrids10km: (squareId: string) => MGRSSquareFeature[] | undefined;
-  clearGrids10km: () => void;
-
   // Visible features for current viewport - computed by ViewportManager
   visible100kmSquares: MGRSSquareFeature[];
   setVisible100kmSquares: (squares: MGRSSquareFeature[]) => void;
 
-  visible10kmGrids: MGRSSquareFeature[];
-  setVisible10kmGrids: (grids: MGRSSquareFeature[]) => void;
+  // 10km grids - append-only flat array. Never filtered, never cleared during session.
+  all10kmFeatures: MGRSSquareFeature[];
+  append10kmFeatures: (features: MGRSSquareFeature[]) => void;
 
   // Current viewport bounds - for optimization
   viewportBounds: {
@@ -65,25 +60,17 @@ export const useMGRSStore = create<MGRSStore>((set, get) => ({
   },
   clearSquares100km: () => set({ squares100km: new Map() }),
 
-  // 10km grids
-  grids10km: new Map(),
-  setGrids10km: (squareId, grids) => {
-    const current = get().grids10km;
-    const updated = new Map(current);
-    updated.set(squareId, grids);
-    set({ grids10km: updated });
-  },
-  getGrids10km: (squareId) => {
-    return get().grids10km.get(squareId);
-  },
-  clearGrids10km: () => set({ grids10km: new Map() }),
-
   // Visible features (computed by ViewportManager)
   visible100kmSquares: [],
   setVisible100kmSquares: (squares) => set({ visible100kmSquares: squares }),
 
-  visible10kmGrids: [],
-  setVisible10kmGrids: (grids) => set({ visible10kmGrids: grids }),
+  // 10km grids - append-only, never recomputed
+  all10kmFeatures: [],
+  append10kmFeatures: (features) => {
+    const current = get().all10kmFeatures;
+    console.log(`[Store] append10kmFeatures: adding ${features.length}, total will be ${current.length + features.length}`);
+    set({ all10kmFeatures: [...current, ...features] });
+  },
 
   // Viewport bounds
   viewportBounds: null,
@@ -92,9 +79,8 @@ export const useMGRSStore = create<MGRSStore>((set, get) => ({
   // Clear all
   clearAll: () => set({
     squares100km: new Map(),
-    grids10km: new Map(),
     visible100kmSquares: [],
-    visible10kmGrids: [],
+    all10kmFeatures: [],
     viewportBounds: null,
   }),
 }));

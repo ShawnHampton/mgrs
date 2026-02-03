@@ -1,27 +1,20 @@
 /**
  * Generate 10km MGRS grid cells for a given 100km square.
  *
- * Follows the same pattern as generate100kmSquares.ts:
- * 1. Project 100km square polygon corners to UTM to find the grid range
- * 2. Build UTM rectangles for each 10km cell
+ * For each 100km square, we:
+ * 1. Project the square's center to UTM and snap to 100km boundaries to get exact extent
+ * 2. Build UTM rectangles for each 10km cell within that extent
  * 3. Project them to WGS84 with dense edge sampling (captures curvature)
- * 4. Clip to the 100km square boundary using JSTS polygon intersection
- * 5. Label each cell using mgrs.forward() for authoritative MGRS IDs
+ * 4. Label each cell using mgrs.forward() for authoritative MGRS IDs
+ *
+ * Note: No culling/clipping to the parent 100km square boundary is performed
+ * in this phase — all cells within the UTM extent are emitted.
  */
 
 import proj4 from 'proj4';
-import { forward as mgrsForward } from 'mgrs';
-import GeometryFactory from 'jsts/org/locationtech/jts/geom/GeometryFactory';
-import Coordinate from 'jsts/org/locationtech/jts/geom/Coordinate';
-import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp';
-import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp';
 import type { MGRSSquareFeature } from '../types/mgrs';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type JSTSGeometry = any;
-
-const geometryFactory = new GeometryFactory();
-
+// UTM projection string cache
 const UTM_PROJ_CACHE: Map<number, string> = new Map();
 
 function getUTMProjection(zone: number, hemisphere: 'N' | 'S'): string {
@@ -45,229 +38,184 @@ function latLonToUTM(lon: number, lat: number, zone: number, hemisphere: 'N' | '
   return [easting, northing];
 }
 
+/**
+ * Project a UTM rectangle to WGS84, sampling points along each edge
+ * to capture the curvature of UTM → WGS84 projection.
+ *
+ * 10km cells are much smaller than 100km cells, so 8 samples per edge
+ * is sufficient to represent the curvature accurately.
+ */
 function utmRectToWGS84Polygon(
   eMin: number,
   nMin: number,
   size: number,
   zone: number,
   hemisphere: 'N' | 'S',
-  samplesPerEdge: number = 10
+  samplesPerEdge: number = 8
 ): number[][] {
   const eMax = eMin + size;
   const nMax = nMin + size;
   const points: number[][] = [];
 
+  // Bottom edge: left to right
   for (let i = 0; i < samplesPerEdge; i++) {
     const e = eMin + (eMax - eMin) * (i / samplesPerEdge);
     const [lon, lat] = utmToLatLon(e, nMin, zone, hemisphere);
     points.push([lon, lat]);
   }
+  // Right edge: bottom to top
   for (let i = 0; i < samplesPerEdge; i++) {
     const n = nMin + (nMax - nMin) * (i / samplesPerEdge);
     const [lon, lat] = utmToLatLon(eMax, n, zone, hemisphere);
     points.push([lon, lat]);
   }
+  // Top edge: right to left
   for (let i = 0; i < samplesPerEdge; i++) {
     const e = eMax - (eMax - eMin) * (i / samplesPerEdge);
     const [lon, lat] = utmToLatLon(e, nMax, zone, hemisphere);
     points.push([lon, lat]);
   }
+  // Left edge: top to bottom
   for (let i = 0; i < samplesPerEdge; i++) {
     const n = nMax - (nMax - nMin) * (i / samplesPerEdge);
     const [lon, lat] = utmToLatLon(eMin, n, zone, hemisphere);
     points.push([lon, lat]);
   }
 
+  // Close the ring
   points.push([...points[0]]);
   return points;
 }
 
-function coordsToJSTSPolygon(coords: number[][]): JSTSGeometry {
-  const jtsCoords = coords.map(c => new Coordinate(c[0], c[1]));
-  const ring = geometryFactory.createLinearRing(jtsCoords);
-  return geometryFactory.createPolygon(ring);
-}
-
-function jstsToGeoJSONCoords(geom: JSTSGeometry): number[][][][] {
-  const results: number[][][][] = [];
-
-  const type = geom.getGeometryType();
-  if (type === 'Polygon') {
-    const exterior = (geom as any).getExteriorRing();
-    const coords = exterior.getCoordinates().map((c: any) => [c.x, c.y]);
-    // GeoJSON exterior rings must be CCW. JTS produces CW. Reverse them.
-    coords.reverse();
-    results.push([coords]);
-  } else if (type === 'MultiPolygon') {
-    const n = geom.getNumGeometries();
-    for (let i = 0; i < n; i++) {
-      const poly = geom.getGeometryN(i);
-      const exterior = (poly as any).getExteriorRing();
-      const coords = exterior.getCoordinates().map((c: any) => [c.x, c.y]);
-      // GeoJSON exterior rings must be CCW.
-      coords.reverse();
-      results.push([coords]);
-    }
-  }
-
-  return results;
-}
-
 /**
- * Generate all 10km grid cell features for a single 100km square.
+ * Generate all 10km MGRS grid cell features for a single 100km square.
+ *
+ * @param zone       UTM zone number (1–60)
+ * @param hemisphere 'N' or 'S'
+ * @param bounds     100km square polygon coordinates [[[lon, lat], ...]]
+ * @param squareId   Full MGRS 100km square ID, e.g. "18SUJ"
+ * @param utmBounds  Optional exact UTM bounds [minE, minN, maxE, maxN]
  */
 export function generate10kmGridForSquare(
-  zone: number,
+  zone: number | string,
   hemisphere: 'N' | 'S',
-  squarePolygonCoords: number[][][],
-  parentId: string
+  bounds: number[][][],
+  squareId: string,
+  utmBounds?: [number, number, number, number]
 ): MGRSSquareFeature[] {
   const features: MGRSSquareFeature[] = [];
-  const gzd = parentId.replace(/[A-Z]{2}$/, ''); // e.g. "18SUJ" → "18S"
+  const zoneNum = typeof zone === 'string' ? parseInt(zone, 10) : zone;
 
-  // Build JSTS geometry for the 100km square boundary
-  let squareGeom: JSTSGeometry;
-  try {
-    squareGeom = coordsToJSTSPolygon(squarePolygonCoords[0]);
-  } catch (e) {
-    console.warn(`[generate10km] Failed to create square geometry for ${parentId}:`, e);
+  // DEBUG: Only process 05QKB for now
+  if (squareId.toUpperCase() !== '05QKB') {
     return features;
   }
 
-  // Project polygon corners to UTM to find easting/northing range
-  let minE = Infinity, maxE = -Infinity;
-  let minN = Infinity, maxN = -Infinity;
+  // Extract GZD from squareId (e.g., "18SUJ" → "18S")
+  const gzdMatch = squareId.match(/^(\d{2}[A-Z])/);
+  const gzd = gzdMatch ? gzdMatch[1] : squareId.substring(0, 3);
 
-  for (const coord of squarePolygonCoords[0]) {
-    try {
-      const [e, n] = latLonToUTM(coord[0], coord[1], zone, hemisphere);
-      minE = Math.min(minE, e);
-      maxE = Math.max(maxE, e);
-      minN = Math.min(minN, n);
-      maxN = Math.max(maxN, n);
-    } catch {
-      // Skip points that fail to project
+  // Validate bounds
+  if (!bounds || !bounds[0] || bounds[0].length < 3) {
+    console.warn(`[generate10km] Invalid bounds for ${squareId}: missing or degenerate polygon`);
+    return features;
+  }
+
+  // Use exact UTM bounds if provided, otherwise derive from polygon
+  let minE: number, minN: number, maxE: number, maxN: number;
+
+  if (utmBounds) {
+    // Use the exact UTM bounds from the 100km squares data
+    [minE, minN, maxE, maxN] = utmBounds;
+    console.log(`[generate10km] Using provided UTM bounds for ${squareId}: E[${minE}–${maxE}] N[${minN}–${maxN}]`);
+  } else {
+    // Fallback: Derive from polygon center and snap to 100km boundaries
+    let sumLon = 0, sumLat = 0, count = 0;
+    for (const coord of bounds[0]) {
+      if (coord.length >= 2) {
+        sumLon += coord[0];
+        sumLat += coord[1];
+        count++;
+      }
     }
+
+    if (count === 0) {
+      console.warn(`[generate10km] No valid coordinates for ${squareId}`);
+      return features;
+    }
+
+    const centerLon = sumLon / count;
+    const centerLat = sumLat / count;
+
+    // Project center to UTM
+    let centerE: number, centerN: number;
+    try {
+      [centerE, centerN] = latLonToUTM(centerLon, centerLat, zoneNum, hemisphere);
+    } catch (err) {
+      console.warn(`[generate10km] Failed to project center for ${squareId}:`, err);
+      return features;
+    }
+
+    if (!isFinite(centerE) || !isFinite(centerN)) {
+      console.warn(`[generate10km] Invalid UTM center for ${squareId}`);
+      return features;
+    }
+
+    // Snap center to 100km grid boundaries
+    const squareSize = 100_000;
+    minE = Math.floor(centerE / squareSize) * squareSize;
+    maxE = minE + squareSize;
+    minN = Math.floor(centerN / squareSize) * squareSize;
+    maxN = minN + squareSize;
+    console.log(`[generate10km] Derived UTM bounds for ${squareId}: E[${minE}–${maxE}] N[${minN}–${maxN}]`);
   }
 
-  if (!isFinite(minE) || !isFinite(maxE)) {
-    return features;
-  }
-
-  // Snap to 10km grid
-  const gridSize = 10000;
-  minE = Math.floor(minE / gridSize) * gridSize;
-  maxE = Math.ceil(maxE / gridSize) * gridSize;
-  minN = Math.floor(minN / gridSize) * gridSize;
-  maxN = Math.ceil(maxN / gridSize) * gridSize;
-
-  // Track failures for diagnostics
-  let cellsAttempted = 0;
-  let intersectionFailures = 0;
-
+  // Iterate over each 10km cell
+  const gridSize = 10_000;
   for (let e = minE; e < maxE; e += gridSize) {
     for (let n = minN; n < maxN; n += gridSize) {
-      cellsAttempted++;
       try {
-        const wgs84Ring = utmRectToWGS84Polygon(e, n, gridSize, zone, hemisphere, 10);
+        // Build UTM rectangle projected to WGS84
+        const wgs84Ring = utmRectToWGS84Polygon(e, n, gridSize, zoneNum, hemisphere);
 
-        let cellGeom: JSTSGeometry;
-        try {
-          cellGeom = coordsToJSTSPolygon(wgs84Ring);
-        } catch {
-          continue;
+        // Compute 10km cell ID from UTM coordinates
+        // The 10km digit is which 10km cell within the 100km square (0-9 for each axis)
+        // We use the cell's starting easting/northing, not the center
+        const eDigit = Math.floor((e - minE) / gridSize);
+        const nDigit = Math.floor((n - minN) / gridSize);
+        const cellId = `${eDigit}${nDigit}`;
+        const mgrsString = `${squareId}${cellId}`;
+
+        const feature = {
+          type: 'Feature',
+          properties: {
+            id: mgrsString,
+            squareId: cellId,
+            gzd,
+          },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [wgs84Ring],
+          },
+        };
+
+        // DEBUG: Log first feature
+        if (features.length === 0) {
+          console.log(`[generate10km] First feature for ${squareId}:`, JSON.stringify(feature.properties));
         }
 
-        let intersection: JSTSGeometry;
-        try {
-          intersection = OverlayOp.intersection(squareGeom, cellGeom);
-        } catch {
-          // Retry with BufferOp to repair topology issues
-          try {
-            const repairedSquare = BufferOp.bufferOp(squareGeom, 0);
-            const repairedCell = BufferOp.bufferOp(cellGeom, 0);
-            intersection = OverlayOp.intersection(repairedSquare, repairedCell);
-          } catch {
-            intersectionFailures++;
-            continue;
-          }
-        }
-
-        if (intersection.isEmpty() || intersection.getArea() < 1e-8) {
-          // Fallback: If intersection is empty, it might be due to precision issues at the edge.
-          // Check if the cell center is actually inside the square using a simple point test.
-          // If so, use the cellGeom directly (clipped to squareGeom roughly via intersection, but if that failed, we take the cell).
-          // Actually, if intersection failed, we can try to just use the cell geometry if it's mostly inside.
-          
-          // Alternative fallback: Try intersecting with a slightly larger square
-          try {
-             const largerSquare = BufferOp.bufferOp(squareGeom, 0.0001);
-             intersection = OverlayOp.intersection(largerSquare, cellGeom);
-          } catch {
-             // giving up
-          }
-
-          if (intersection.isEmpty() || intersection.getArea() < 1e-8) {
-             continue;
-          }
-        }
-
-        // Get center of the UTM cell for MGRS labeling
-        const centerE = e + gridSize / 2;
-        const centerN = n + gridSize / 2;
-        const [centerLon, centerLat] = utmToLatLon(centerE, centerN, zone, hemisphere);
-
-        // Use mgrs.forward() at accuracy=1 for 10km precision
-        let mgrsString: string;
-        try {
-          mgrsString = mgrsForward([centerLon, centerLat], 1);
-          // Normalize to zero-padded zone (e.g. "5Q..." -> "05Q...")
-          const match = mgrsString.match(/^(\d{1,2})([A-Z])/);
-          if (match && match[1].length === 1) {
-            mgrsString = `0${mgrsString}`;
-          }
-        } catch {
-          continue;
-        }
-
-        // Extract the numeric grid digits (e.g. "18SUJ15" → "15")
-        // Note: regex now expects 2 digits for zone
-        const squareDigits = mgrsString.replace(/^(\d{2})([A-Z])([A-Z]{2})/, '');
-        const fullId = mgrsString;
-        
-        // DEBUG: Verbose logging for 05QKB
-        if (fullId.startsWith('05QKB') || fullId.startsWith('5QKB')) {
-           // console.log(`[generate10km] Generated feature ${fullId} at UTM ${centerE},${centerN}`);
-        }
-
-        const polyCoords = jstsToGeoJSONCoords(intersection);
-
-        for (const coords of polyCoords) {
-          features.push({
-            type: 'Feature',
-            properties: {
-              id: fullId,
-              squareId: squareDigits,
-              gzd,
-            },
-            geometry: {
-              type: 'Polygon',
-              coordinates: coords,
-            },
-          });
-        }
+        features.push(feature);
       } catch (err) {
-        console.warn(`[generate10km] Error processing cell at ${e},${n} in ${parentId}:`, err);
+        console.warn(`[generate10km] Error processing cell at ${e},${n} in ${squareId}:`, err);
       }
     }
   }
 
-  if (features.length === 0 && cellsAttempted > 0) {
+  if (features.length === 0) {
     console.warn(
-      `[generate10km] Zero features for ${parentId}: ${cellsAttempted} cells attempted, ` +
-      `${intersectionFailures} intersection failures, ` +
-      `UTM range E[${minE}-${maxE}] N[${minN}-${maxN}], ` +
-      `squareGeom type=${squareGeom.getGeometryType()} area=${squareGeom.getArea()}`
+      `[generate10km] Zero features for ${squareId}. ` +
+      `UTM extent: E[${minE}–${maxE}] N[${minN}–${maxN}], ` +
+      `vertices: ${bounds[0].length}, zone: ${zoneNum}${hemisphere}`
     );
   }
 
